@@ -69,6 +69,10 @@ public class PlayerMovement : MonoBehaviour
 		None
 	}
 
+	[Header("Glider")]
+	public float glideHorizontalSpeed = 8f;
+	public float glideVerticalSpeed = -2f;
+
 	// This cast rays against everything except layer 8.
 	private int rayCastLayerMask = ~(1 << 8);
 
@@ -78,6 +82,7 @@ public class PlayerMovement : MonoBehaviour
 		Crouch,
 		Slide,
 		LedgeClimb,
+		Glide,
 		Normal,
 		GrapplingHookThrow,
 		GrapplingHookFlying
@@ -105,6 +110,7 @@ public class PlayerMovement : MonoBehaviour
 			HandleMovement();
 			HandleCrouch();
 			HandleSprint();
+			HandleGlideStart();
 			HandleGrapplingHookShot();
 			break;
 		case State.GrapplingHookThrow:
@@ -133,6 +139,11 @@ public class PlayerMovement : MonoBehaviour
 			break;
 		case State.LedgeClimb:
 			HandleLedgeClimb();
+			break;
+		case State.Glide:
+			HandleGlideMovement();
+			HandleCamera();
+			//HandleMovement();
 			break;
 		}
 	}
@@ -257,6 +268,29 @@ public class PlayerMovement : MonoBehaviour
 		}
 	}
 
+	private void HandleGlideStart() {
+		if (Input.GetButtonDown("Glide")) {
+			previousMovementSpeed = movementSpeed;
+			movementSpeed = glideHorizontalSpeed;
+			velocity.y = glideVerticalSpeed;
+			state = State.Glide;
+		}
+	}
+
+	private void HandleGlideMovement() {
+		x = Input.GetAxis("Horizontal");
+		z = Input.GetAxis("Vertical");
+		Vector3 move = transform.right * x + transform.forward * z;
+		controller.Move(move * movementSpeed * Time.deltaTime);
+		controller.Move(velocity * Time.deltaTime);
+
+		//Stop glide if canceled with button press or by landing
+		if (Input.GetButtonDown("Glide") || Physics.CheckSphere(groundCheck.position, groundDistance, groundMask)) {
+			movementSpeed = previousMovementSpeed;
+			state = State.Normal;
+		}
+	}
+
 	private void HandleGrapplingHookShot() {
 		if (Input.GetButtonDown("Throw Hook")) {
 			if (Physics.Raycast(camera.transform.position, camera.transform.forward, out RaycastHit raycastHit, maxGrappleDistance, rayCastLayerMask))
@@ -295,7 +329,7 @@ public class PlayerMovement : MonoBehaviour
 			state = State.Normal;
 			velocity.y = -2f;
 			//Set grappling line length to 0
-			grapplingHookTransform.localScale = new Vector3(1, 1, 0f);
+			grapplingHookTransform.localScale = new Vector3(0f, 0f, 0f);
 		}
 
 		//If activated, cancels grapple
