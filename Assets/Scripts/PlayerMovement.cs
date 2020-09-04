@@ -47,7 +47,21 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Camera")]
     public Camera camera;
-    //public Animator animator;
+
+	[Header("Ledge Climb")]
+	public float ledgeClimbSpeed = 8f;
+    private Vector3 ledgeClimbObjectHitPoint;
+    private float ledgeClimbTargetHeight;
+    private Vector3 forwardDirection;
+    private Vector3 upDirection;
+    private LedgeClimbState ledgeState;
+    private enum LedgeClimbState {
+        ApprochObj,
+        ClimbUp,
+        CenterOnObj,
+    	None
+    }
+    private float targetX = 0f;
 
     // This cast rays against everything except layer 8.
     private int rayCastLayerMask = ~(1 << 8);
@@ -57,6 +71,7 @@ public class PlayerMovement : MonoBehaviour
         Sprint,
         Crouch,
         Slide,
+        LedgeClimb,
         Normal, 
         GrapplingHookThrow,
         GrapplingHookFlying
@@ -64,6 +79,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Awake() {
         state = State.Normal;
+		ledgeState = LedgeClimbState.None;
         movementSpeed = walkSpeed;
     }
 
@@ -96,10 +112,14 @@ public class PlayerMovement : MonoBehaviour
             case State.Slide:
                 HandleSlide();
                 break;
+            case State.LedgeClimb:
+            	HandleLedgeClimb();
+            	break;
         }          
     }
 
     private void HandleMovement() {
+    	//Velocity needs to be reset otherwise force/speed to ground would increase with every jump
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if(isGrounded && velocity.y < 0) {
             velocity.y = -2f;
@@ -111,7 +131,19 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(move * movementSpeed * Time.deltaTime);
 
         if(Input.GetButton("Jump") && isGrounded && (state == State.Normal || state == State.Sprint)) {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        	// If player is near object with appropriate height -> ledge climb ELSE jump
+        	if(Physics.Raycast(transform.position, transform.forward, out RaycastHit LedgeClimbHit, 3f, rayCastLayerMask)) {
+        		if(LedgeClimbHit.transform.localScale.y > 1f && LedgeClimbHit.transform.localScale.y < 3.2f) {
+        			ledgeClimbObjectHitPoint = LedgeClimbHit.point;
+        			ledgeClimbTargetHeight = transform.position.y + LedgeClimbHit.transform.localScale.y;
+        			forwardDirection = (ledgeClimbObjectHitPoint - transform.position).normalized;
+    				upDirection = new Vector3(0, ledgeClimbTargetHeight, 0).normalized;
+        			state = State.LedgeClimb;
+        			ledgeState = LedgeClimbState.ApprochObj;
+        		}
+        	} else {
+            	velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
         }
 
         velocity.y += gravity * Time.deltaTime;
@@ -165,6 +197,34 @@ public class PlayerMovement : MonoBehaviour
             Vector3 move = transform.right * x + transform.forward * z;
             controller.Move(move * movementSpeed * Time.deltaTime);
         }        
+    }
+
+    private void HandleLedgeClimb() {    	    	
+    	switch(ledgeState) {
+    		default:
+            case LedgeClimbState.ApprochObj: 
+            	//velocity.y = 0;
+            	//gravity = 0;
+                controller.Move(forwardDirection * ledgeClimbSpeed * Time.deltaTime);
+                if(Vector3.Distance(transform.position, ledgeClimbObjectHitPoint) < 1f) {
+                	ledgeState = LedgeClimbState.ClimbUp;
+                }
+                break;
+            case LedgeClimbState.ClimbUp: 
+                controller.Move(upDirection.normalized * ledgeClimbSpeed * Time.deltaTime);
+                if(transform.position.y >= ledgeClimbTargetHeight) {
+                	targetX = transform.position.x - 1f;
+                	ledgeState = LedgeClimbState.CenterOnObj;
+                }
+                break;
+            case LedgeClimbState.CenterOnObj: 
+                controller.Move(forwardDirection * ledgeClimbSpeed * Time.deltaTime);
+                if(transform.position.x <= targetX) {
+                	ledgeState = LedgeClimbState.None;
+                	state = State.Normal;
+                }
+                break;    
+    	}
     }
 
     private void HandleGrapplingHookShot() {

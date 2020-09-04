@@ -13,7 +13,7 @@ public class MouseLook : MonoBehaviour
 
     void Start()
     {
-    	//TODO uncomment
+    	//Lock Cursor
        	Cursor.lockState = CursorLockMode.Locked;
     }
 
