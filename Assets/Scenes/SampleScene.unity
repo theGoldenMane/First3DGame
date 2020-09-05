@@ -1177,7 +1177,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 1371772622}
-  walkSpeed: 12
+  walkSpeed: 2
   sprintSpeed: 24
   movementSpeed: 0
   gravity: -25

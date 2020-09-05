@@ -24,6 +24,9 @@ public class PlayerMovement : MonoBehaviour
 	private float x = 0f;
 	private float z = 0f;
 	private bool spaceAbove = true;
+	private Vector3 move;
+	private Vector3 previousPos;
+    private Vector3 transformForward;
 
 	[Header("Camera")]
 	public Camera camera;
@@ -114,10 +117,11 @@ public class PlayerMovement : MonoBehaviour
 			HandleGrapplingHookShot();
 			break;
 		case State.Sprint:
+			HandleMovement();
 			HandleCamera();
 			HandleSprint();
 			HandleSlide();
-			HandleMovement();
+			
 			HandleGrapplingHookShot();
 			break;
 		case State.Crouch:
@@ -148,6 +152,11 @@ public class PlayerMovement : MonoBehaviour
 		}
 	}
 
+	void LateUpdate() {
+		previousPos = transform.position;
+     	transformForward = transform.forward;
+	}
+
 	private void HandleCamera() {
 		float mouseX = Input.GetAxis("Mouse X") * mouseSensivity * Time.deltaTime;
 		float mouseY = Input.GetAxis("Mouse Y") * mouseSensivity * Time.deltaTime;
@@ -168,7 +177,7 @@ public class PlayerMovement : MonoBehaviour
 
 		x = Input.GetAxis("Horizontal");
 		z = Input.GetAxis("Vertical");
-		Vector3 move = transform.right * x + transform.forward * z;
+		move = transform.right * x + transform.forward * z;
 		controller.Move(move * movementSpeed * Time.deltaTime);
 
 		if (Input.GetButtonDown("Jump") && isGrounded && (state == State.Normal || state == State.Sprint)) {
@@ -193,10 +202,13 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void HandleSprint() {
-		if (Input.GetButtonDown("Sprint")) {
+		Vector3 currenPos = transform.position;
+	 	Vector3 movementDirection = (currenPos - previousPos);
+
+		if (Input.GetButton("Sprint") && Vector3.Dot(transformForward, movementDirection) >= 0) {
 			movementSpeed = sprintSpeed;
 			state = State.Sprint;
-		} else if (Input.GetButtonUp("Sprint")) {
+		} else {
 			movementSpeed = walkSpeed;
 			state = State.Normal;
 		}
