@@ -113,20 +113,12 @@ public class PlayerMovement : MonoBehaviour
 			HandleGlideStart();
 			HandleGrapplingHookShot();
 			break;
-		case State.GrapplingHookThrow:
-			HandleCamera();
-			HandleMovement();
-			HandleGrapplingHookThrow();
-			break;
-		case State.GrapplingHookFlying:
-			HandleCamera();
-			HandleGrapplingHookMovement();
-			break;
 		case State.Sprint:
 			HandleCamera();
 			HandleSprint();
 			HandleSlide();
 			HandleMovement();
+			HandleGrapplingHookShot();
 			break;
 		case State.Crouch:
 			HandleCamera();
@@ -143,7 +135,15 @@ public class PlayerMovement : MonoBehaviour
 		case State.Glide:
 			HandleGlideMovement();
 			HandleCamera();
-			//HandleMovement();
+			break;
+		case State.GrapplingHookThrow:
+			HandleCamera();
+			HandleMovement();
+			HandleGrapplingHookThrow();
+			break;
+		case State.GrapplingHookFlying:
+			HandleCamera();
+			HandleGrapplingHookMovement();
 			break;
 		}
 	}
@@ -171,7 +171,7 @@ public class PlayerMovement : MonoBehaviour
 		Vector3 move = transform.right * x + transform.forward * z;
 		controller.Move(move * movementSpeed * Time.deltaTime);
 
-		if (Input.GetButton("Jump") && isGrounded && (state == State.Normal || state == State.Sprint)) {
+		if (Input.GetButtonDown("Jump") && isGrounded && (state == State.Normal || state == State.Sprint)) {
 			// If player is near object with appropriate height -> ledge climb ELSE jump
 			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit LedgeClimbHit, ledgeClimbDistance, rayCastLayerMask)) {
 				if (LedgeClimbHit.transform.localScale.y > ledgeClimbHeightMin && LedgeClimbHit.transform.localScale.y < ledgeClimbHeightMax) {
