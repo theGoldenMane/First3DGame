@@ -56,7 +56,7 @@ public class PlayerMovement : MonoBehaviour
 	[Header("Ledge Climb")]
 	public float ledgeClimbDistance = 3f;
 	public float ledgeClimbHeightMin = 1f;
-	public float ledgeClimbHeightMax = 3.2f;
+	public float ledgeClimbHeightMax = 4.2f;
 	public float ledgeClimbSpeed = 8f;
 	private float previousMovementSpeed = 0f;
 	private Vector3 ledgeClimbObjectHitPoint;
@@ -115,14 +115,15 @@ public class PlayerMovement : MonoBehaviour
 			HandleSprint();
 			HandleGlideStart();
 			HandleGrapplingHookShot();
+			DetectLedgeClimb();
 			break;
 		case State.Sprint:
 			HandleMovement();
 			HandleCamera();
 			HandleSprint();
 			HandleSlide();
-			
 			HandleGrapplingHookShot();
+			DetectLedgeClimb();
 			break;
 		case State.Crouch:
 			HandleCamera();
@@ -180,6 +181,7 @@ public class PlayerMovement : MonoBehaviour
 		move = transform.right * x + transform.forward * z;
 		controller.Move(move * movementSpeed * Time.deltaTime);
 
+		/*
 		if (Input.GetButtonDown("Jump") && isGrounded && (state == State.Normal || state == State.Sprint)) {
 			// If player is near object with appropriate height -> ledge climb ELSE jump
 			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit LedgeClimbHit, ledgeClimbDistance, rayCastLayerMask)) {
@@ -195,7 +197,7 @@ public class PlayerMovement : MonoBehaviour
 			} else {
 				velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
 			}
-		}
+		}*/
 
 		velocity.y += gravity * Time.deltaTime;
 		controller.Move(velocity * Time.deltaTime);
@@ -208,7 +210,7 @@ public class PlayerMovement : MonoBehaviour
 		if (Input.GetButton("Sprint") && Vector3.Dot(transformForward, movementDirection) >= 0) {
 			movementSpeed = sprintSpeed;
 			state = State.Sprint;
-		} else {
+		} else if(state != State.LedgeClimb) {
 			movementSpeed = walkSpeed;
 			state = State.Normal;
 		}
@@ -250,6 +252,23 @@ public class PlayerMovement : MonoBehaviour
 
 			Vector3 move = transform.right * x + transform.forward * z;
 			controller.Move(move * movementSpeed * Time.deltaTime);
+		}
+	}
+
+	private void DetectLedgeClimb() {
+		if (Input.GetButtonDown("Jump")) {
+			// If player is near object with appropriate height -> ledge climb ELSE jump
+			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit LedgeClimbHit, ledgeClimbDistance, rayCastLayerMask)) {
+				if (LedgeClimbHit.transform.localScale.y > ledgeClimbHeightMin && LedgeClimbHit.transform.localScale.y < ledgeClimbHeightMax) {
+					ledgeClimbObjectHitPoint = LedgeClimbHit.point;
+					ledgeClimbTargetHeight = transform.position.y + LedgeClimbHit.transform.localScale.y;
+					forwardDirection = (ledgeClimbObjectHitPoint - transform.position).normalized;
+					upDirection = new Vector3(0, ledgeClimbTargetHeight, 0).normalized;
+					previousMovementSpeed = movementSpeed;
+					state = State.LedgeClimb;
+					ledgeState = LedgeClimbState.ApprochObj;
+				}
+			}
 		}
 	}
 
@@ -342,6 +361,7 @@ public class PlayerMovement : MonoBehaviour
 			velocity.y = -2f;
 			//Set grappling line length to 0
 			grapplingHookTransform.localScale = new Vector3(0f, 0f, 0f);
+			DetectLedgeClimb();
 		}
 
 		//If activated, cancels grapple
