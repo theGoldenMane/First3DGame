@@ -176,9 +176,10 @@ public class PlayerMovement : MonoBehaviour
 			velocity.y = -2f;
 		}
 
-		x = Input.GetAxis("Horizontal");
-		z = Input.GetAxis("Vertical");
+		x = Input.GetAxisRaw("Horizontal");
+		z = Input.GetAxisRaw("Vertical");
 		move = transform.right * x + transform.forward * z;
+		move.Normalize();
 		controller.Move(move * movementSpeed * Time.deltaTime);
 
 		/*
@@ -204,10 +205,8 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void HandleSprint() {
-		Vector3 currenPos = transform.position;
-	 	Vector3 movementDirection = (currenPos - previousPos);
-
-		if (Input.GetButton("Sprint") && Vector3.Dot(transformForward, movementDirection) >= 0) {
+		// Sprint if player isn't moving backwards
+		if (Input.GetButton("Sprint") && !Input.GetKey(KeyCode.S)) {
 			movementSpeed = sprintSpeed;
 			state = State.Sprint;
 		} else if(state != State.LedgeClimb) {
