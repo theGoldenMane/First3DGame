@@ -52,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
 	public float grapplingHookThrowSpeed = 90;
 	private Vector3 grapplingHookPosition;
 	private float grapplingHookLineSize = 0f;
+	private RaycastHit grappableObjectHit;
 
 	[Header("Ledge Climb")]
 	public float ledgeClimbDistance = 3f;
@@ -81,6 +82,7 @@ public class PlayerMovement : MonoBehaviour
 
 	private State state;
 	private enum State {
+		Jump,
 		Sprint,
 		Crouch,
 		Slide,
@@ -115,7 +117,7 @@ public class PlayerMovement : MonoBehaviour
 			HandleSprint();
 			HandleGlideStart();
 			HandleGrapplingHookShot();
-			DetectLedgeClimb();
+			HandleJump();
 			break;
 		case State.Sprint:
 			HandleMovement();
@@ -123,7 +125,7 @@ public class PlayerMovement : MonoBehaviour
 			HandleSprint();
 			HandleSlide();
 			HandleGrapplingHookShot();
-			DetectLedgeClimb();
+			HandleJump();
 			break;
 		case State.Crouch:
 			HandleCamera();
@@ -170,12 +172,6 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void HandleMovement() {
-		//Velocity needs to be reset otherwise force/speed to ground would increase with every jump
-		isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-		if (isGrounded && velocity.y < 0) {
-			velocity.y = -2f;
-		}
-
 		x = Input.GetAxisRaw("Horizontal");
 		z = Input.GetAxisRaw("Vertical");
 		move = transform.right * x + transform.forward * z;
@@ -199,6 +195,21 @@ public class PlayerMovement : MonoBehaviour
 				velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
 			}
 		}*/
+	}
+
+	private void HandleJump() {
+		//Velocity needs to be reset otherwise force/speed to ground would increase with every jump
+		isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+		if (isGrounded && velocity.y < 0) {
+			velocity.y = -2f;
+		}
+
+		if (Input.GetButtonDown("Jump") && isGrounded) {
+			DetectLedgeClimb();
+			if(state != State.LedgeClimb) {
+				velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+			}
+		}
 
 		velocity.y += gravity * Time.deltaTime;
 		controller.Move(velocity * Time.deltaTime);
@@ -255,18 +266,15 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void DetectLedgeClimb() {
-		if (Input.GetButtonDown("Jump")) {
-			// If player is near object with appropriate height -> ledge climb ELSE jump
-			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit LedgeClimbHit, ledgeClimbDistance, rayCastLayerMask)) {
-				if (LedgeClimbHit.transform.localScale.y > ledgeClimbHeightMin && LedgeClimbHit.transform.localScale.y < ledgeClimbHeightMax) {
-					ledgeClimbObjectHitPoint = LedgeClimbHit.point;
-					ledgeClimbTargetHeight = transform.position.y + LedgeClimbHit.transform.localScale.y;
-					forwardDirection = (ledgeClimbObjectHitPoint - transform.position).normalized;
-					upDirection = new Vector3(0, ledgeClimbTargetHeight, 0).normalized;
-					previousMovementSpeed = movementSpeed;
-					state = State.LedgeClimb;
-					ledgeState = LedgeClimbState.ApprochObj;
-				}
+		if (ObjectGrappable()) {
+			if (grappableObjectHit.transform.localScale.y > ledgeClimbHeightMin && grappableObjectHit.transform.localScale.y < ledgeClimbHeightMax) {
+				ledgeClimbObjectHitPoint = grappableObjectHit.point;
+				ledgeClimbTargetHeight = transform.position.y + grappableObjectHit.transform.localScale.y;
+				forwardDirection = (ledgeClimbObjectHitPoint - transform.position).normalized;
+				upDirection = new Vector3(0, ledgeClimbTargetHeight, 0).normalized;
+				previousMovementSpeed = movementSpeed;
+				state = State.LedgeClimb;
+				ledgeState = LedgeClimbState.ApprochObj;
 			}
 		}
 	}
@@ -405,5 +413,15 @@ public class PlayerMovement : MonoBehaviour
 			controller.center = new Vector3(0, 0, 0);
 		}
 		return spaceAbove;
+	}
+
+	private bool ObjectGrappable() {
+		if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, ledgeClimbDistance, rayCastLayerMask)) {
+			if (hit.transform.localScale.y > ledgeClimbHeightMin && hit.transform.localScale.y < ledgeClimbHeightMax) {
+				grappableObjectHit = hit;
+				return true;
+			}
+		}
+		return false;
 	}
 }
