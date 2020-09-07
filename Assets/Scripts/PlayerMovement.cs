@@ -59,7 +59,6 @@ public class PlayerMovement : MonoBehaviour
 	public float ledgeClimbHeightMin = 1f;
 	public float ledgeClimbHeightMax = 4.2f;
 	public float ledgeClimbSpeed = 8f;
-	private float previousMovementSpeed = 0f;
 	private Vector3 ledgeClimbObjectHitPoint;
 	private float ledgeClimbTargetHeight;
 	private Vector3 forwardDirection;
@@ -117,6 +116,9 @@ public class PlayerMovement : MonoBehaviour
 			HandleSprint();
 			HandleGlideStart();
 			HandleGrapplingHookShot();
+			HandleJump();
+			break;
+		case State.Jump: 
 			HandleJump();
 			break;
 		case State.Sprint:
@@ -177,24 +179,6 @@ public class PlayerMovement : MonoBehaviour
 		move = transform.right * x + transform.forward * z;
 		move.Normalize();
 		controller.Move(move * movementSpeed * Time.deltaTime);
-
-		/*
-		if (Input.GetButtonDown("Jump") && isGrounded && (state == State.Normal || state == State.Sprint)) {
-			// If player is near object with appropriate height -> ledge climb ELSE jump
-			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit LedgeClimbHit, ledgeClimbDistance, rayCastLayerMask)) {
-				if (LedgeClimbHit.transform.localScale.y > ledgeClimbHeightMin && LedgeClimbHit.transform.localScale.y < ledgeClimbHeightMax) {
-					ledgeClimbObjectHitPoint = LedgeClimbHit.point;
-					ledgeClimbTargetHeight = transform.position.y + LedgeClimbHit.transform.localScale.y;
-					forwardDirection = (ledgeClimbObjectHitPoint - transform.position).normalized;
-					upDirection = new Vector3(0, ledgeClimbTargetHeight, 0).normalized;
-					previousMovementSpeed = movementSpeed;
-					state = State.LedgeClimb;
-					ledgeState = LedgeClimbState.ApprochObj;
-				}
-			} else {
-				velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-			}
-		}*/
 	}
 
 	private void HandleJump() {
@@ -203,10 +187,14 @@ public class PlayerMovement : MonoBehaviour
 		if (isGrounded && velocity.y < 0) {
 			velocity.y = -2f;
 		}
+		if(state == State.Jump && isGrounded) {
+			state = State.Normal;
+		}
 
 		if (Input.GetButtonDown("Jump") && isGrounded) {
 			DetectLedgeClimb();
 			if(state != State.LedgeClimb) {
+				state = State.Jump;
 				velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
 			}
 		}
@@ -220,7 +208,7 @@ public class PlayerMovement : MonoBehaviour
 		if (Input.GetButton("Sprint") && !Input.GetKey(KeyCode.S)) {
 			movementSpeed = sprintSpeed;
 			state = State.Sprint;
-		} else if(state != State.LedgeClimb) {
+		} else if(state == State.Sprint) {
 			movementSpeed = walkSpeed;
 			state = State.Normal;
 		}
@@ -272,7 +260,6 @@ public class PlayerMovement : MonoBehaviour
 				ledgeClimbTargetHeight = transform.position.y + grappableObjectHit.transform.localScale.y;
 				forwardDirection = (ledgeClimbObjectHitPoint - transform.position).normalized;
 				upDirection = new Vector3(0, ledgeClimbTargetHeight, 0).normalized;
-				previousMovementSpeed = movementSpeed;
 				state = State.LedgeClimb;
 				ledgeState = LedgeClimbState.ApprochObj;
 			}
@@ -299,7 +286,6 @@ public class PlayerMovement : MonoBehaviour
 			controller.Move(forwardDirection * movementSpeed * Time.deltaTime);
 			if (Vector3.Distance(transform.position, ledgeClimbUpPos) > 1f) {
 				ledgeState = LedgeClimbState.None;
-				movementSpeed = previousMovementSpeed;
 				state = State.Normal;
 			}
 			break;
@@ -308,7 +294,6 @@ public class PlayerMovement : MonoBehaviour
 
 	private void HandleGlideStart() {
 		if (Input.GetButtonDown("Glide")) {
-			previousMovementSpeed = movementSpeed;
 			movementSpeed = glideHorizontalSpeed;
 			velocity.y = glideVerticalSpeed;
 			state = State.Glide;
@@ -324,7 +309,6 @@ public class PlayerMovement : MonoBehaviour
 
 		//Stop glide if canceled with button press or by landing
 		if (Input.GetButtonDown("Glide") || Physics.CheckSphere(groundCheck.position, groundDistance, groundMask)) {
-			movementSpeed = previousMovementSpeed;
 			state = State.Normal;
 		}
 	}
