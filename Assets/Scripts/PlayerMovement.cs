@@ -118,7 +118,8 @@ public class PlayerMovement : MonoBehaviour
 			HandleGrapplingHookShot();
 			HandleJump();
 			break;
-		case State.Jump: 
+		case State.Jump:
+			HandleMovement(); 
 			HandleJump();
 			break;
 		case State.Sprint:
@@ -187,7 +188,9 @@ public class PlayerMovement : MonoBehaviour
 		if (isGrounded && velocity.y < 0) {
 			velocity.y = -2f;
 		}
-		if(state == State.Jump && isGrounded) {
+		
+		if(state == State.Jump && isGrounded && velocity.y < 0) {
+			movementSpeed = walkSpeed;
 			state = State.Normal;
 		}
 
@@ -205,7 +208,7 @@ public class PlayerMovement : MonoBehaviour
 
 	private void HandleSprint() {
 		// Sprint if player isn't moving backwards
-		if (Input.GetButton("Sprint") && !Input.GetKey(KeyCode.S)) {
+		if (Input.GetButton("Sprint") && !Input.GetKey(KeyCode.S) && state != State.Jump) {
 			movementSpeed = sprintSpeed;
 			state = State.Sprint;
 		} else if(state == State.Sprint) {
