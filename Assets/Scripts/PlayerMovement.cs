@@ -120,6 +120,7 @@ public class PlayerMovement : MonoBehaviour
 			HandleJump();
 			break;
 		case State.Jump:
+			HandleCamera();
 			HandleMovement(); 
 			HandleJump();
 			break;
@@ -193,9 +194,15 @@ public class PlayerMovement : MonoBehaviour
 			velocity.y = -2f;
 		}
 		
+
 		if(state == State.Jump && isGrounded && velocity.y < 0) {
 			movementSpeed = walkSpeed;
 			state = State.Normal;
+		}
+
+		//Test
+		if(state == State.Jump && !isGrounded) {
+			DetectLedgeClimb();
 		}
 
 		if (Input.GetButtonDown("Jump") && isGrounded) {
@@ -263,7 +270,7 @@ public class PlayerMovement : MonoBehaviour
 
 	private void DetectLedgeClimb() {
 		if (ObjectGrappable()) {
-			if (grappableObjectHit.transform.localScale.y > ledgeClimbHeightMin && grappableObjectHit.transform.localScale.y < ledgeClimbHeightMax) {
+			if (grappableObjectHit.transform.localScale.y > ledgeClimbHeightMin && grappableObjectHit.transform.localScale.y < ledgeClimbHeightMax && z > 0) {
 				ledgeClimbObjectHitPoint = grappableObjectHit.point;
 				ledgeClimbTargetHeight = transform.position.y + grappableObjectHit.transform.localScale.y;
 				forwardDirection = (ledgeClimbObjectHitPoint - transform.position).normalized;
