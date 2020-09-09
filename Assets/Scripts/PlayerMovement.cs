@@ -27,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
 	private Vector3 move;
 	private Vector3 previousPos;
     private Vector3 transformForward;
+    private float jumpVerticalDirection;
 
 	[Header("Camera")]
 	public Camera camera;
@@ -177,6 +178,9 @@ public class PlayerMovement : MonoBehaviour
 	private void HandleMovement() {
 		x = Input.GetAxisRaw("Horizontal");
 		z = Input.GetAxisRaw("Vertical");
+		if(state == State.Jump) {
+			z = jumpVerticalDirection;
+		}
 		move = transform.right * x + transform.forward * z;
 		move.Normalize();
 		controller.Move(move * movementSpeed * Time.deltaTime);
@@ -197,6 +201,7 @@ public class PlayerMovement : MonoBehaviour
 		if (Input.GetButtonDown("Jump") && isGrounded) {
 			DetectLedgeClimb();
 			if(state != State.LedgeClimb) {
+				jumpVerticalDirection = Input.GetAxisRaw("Vertical");
 				state = State.Jump;
 				velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
 			}
