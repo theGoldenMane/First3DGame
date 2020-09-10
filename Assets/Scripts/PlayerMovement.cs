@@ -53,7 +53,6 @@ public class PlayerMovement : MonoBehaviour
 	public float grapplingHookThrowSpeed = 90;
 	private Vector3 grapplingHookPosition;
 	private float grapplingHookLineSize = 0f;
-	private RaycastHit grappableObjectHit;
 
 	[Header("Ledge Climb")]
 	public float ledgeClimbDistance = 3f;
@@ -200,7 +199,6 @@ public class PlayerMovement : MonoBehaviour
 			state = State.Normal;
 		}
 
-		//Test
 		if(state == State.Jump && !isGrounded) {
 			DetectLedgeClimb();
 		}
@@ -269,7 +267,7 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void DetectLedgeClimb() {
-		if (ObjectGrappable()) {
+		if (Physics.Raycast(transform.position, transform.forward, out RaycastHit grappableObjectHit, ledgeClimbDistance, rayCastLayerMask)) {
 			if (grappableObjectHit.transform.localScale.y > ledgeClimbHeightMin && grappableObjectHit.transform.localScale.y < ledgeClimbHeightMax && z > 0) {
 				ledgeClimbObjectHitPoint = grappableObjectHit.point;
 				ledgeClimbTargetHeight = transform.position.y + grappableObjectHit.transform.localScale.y;
@@ -367,6 +365,7 @@ public class PlayerMovement : MonoBehaviour
 			velocity.y = -2f;
 			//Set grappling line length to 0
 			grapplingHookTransform.localScale = new Vector3(0f, 0f, 0f);
+			z = 1;
 			DetectLedgeClimb();
 		}
 
@@ -412,15 +411,5 @@ public class PlayerMovement : MonoBehaviour
 			controller.center = new Vector3(0, 0, 0);
 		}
 		return spaceAbove;
-	}
-
-	private bool ObjectGrappable() {
-		if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, ledgeClimbDistance, rayCastLayerMask)) {
-			if (hit.transform.localScale.y > ledgeClimbHeightMin && hit.transform.localScale.y < ledgeClimbHeightMax) {
-				grappableObjectHit = hit;
-				return true;
-			}
-		}
-		return false;
 	}
 }
