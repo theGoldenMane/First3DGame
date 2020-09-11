@@ -391,7 +391,7 @@ public class PlayerMovement : MonoBehaviour
 		grapplingHookLineSize -= grapplingHookFlySpeed * Time.deltaTime;
 		grapplingHookTransform.localScale = new Vector3(1, 1, grapplingHookLineSize);
 
-		float reachedGrapplingHookPositionDistance = 1f;
+		float reachedGrapplingHookPositionDistance = 1.1f;
 		if (Vector3.Distance(transform.position, grapplingHookPosition) < reachedGrapplingHookPositionDistance) {
 			state = State.Normal;
 			velocity.y = -2f;
