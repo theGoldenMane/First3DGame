@@ -140,7 +140,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1371772623}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &213340104
 GameObject:
@@ -272,7 +272,7 @@ GameObject:
   - component: {fileID: 360204232}
   - component: {fileID: 360204231}
   - component: {fileID: 360204230}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: Cube (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -454,7 +454,7 @@ GameObject:
   - component: {fileID: 490448630}
   - component: {fileID: 490448629}
   - component: {fileID: 490448628}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -542,7 +542,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 494131052}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Climb-Parcour
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -779,7 +779,7 @@ GameObject:
   - component: {fileID: 782917822}
   - component: {fileID: 782917821}
   - component: {fileID: 782917820}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: Cube (1)
   m_TagString: Climbable-Object
   m_Icon: {fileID: 0}
@@ -995,7 +995,7 @@ Transform:
   m_Children:
   - {fileID: 1615464734}
   m_Father: {fileID: 1371772623}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &948021056
 GameObject:
@@ -1009,7 +1009,7 @@ GameObject:
   - component: {fileID: 948021059}
   - component: {fileID: 948021058}
   - component: {fileID: 948021057}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1100,7 +1100,7 @@ GameObject:
   - component: {fileID: 1022024005}
   - component: {fileID: 1022024004}
   - component: {fileID: 1022024003}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: Cube (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1219,9 +1219,6 @@ MonoBehaviour:
   jumpHeight: 1.5
   groundCheck: {fileID: 181235711}
   groundDistance: 0.4
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 512
   camera: {fileID: 213340105}
   mouseSensivity: 200
   slideDuration: 1
@@ -1235,10 +1232,7 @@ MonoBehaviour:
   maxGrappleDistance: 40
   grapplingHookTransform: {fileID: 900413624}
   grapplingHookThrowSpeed: 90
-  ledgeCheck: {fileID: 1676160591}
-  ledgeClimbDistance: 3
-  ledgeClimbHeightMin: 1
-  ledgeClimbHeightMax: 4.2
+  ledgeClimbDistance: 1
   ledgeClimbSpeed: 8
   glideHorizontalSpeed: 10
   glideVerticalSpeed: -3
@@ -1273,7 +1267,6 @@ Transform:
   m_Children:
   - {fileID: 763099184}
   - {fileID: 213340108}
-  - {fileID: 1676160591}
   - {fileID: 181235711}
   - {fileID: 900413624}
   m_Father: {fileID: 0}
@@ -1288,7 +1281,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1438272649}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: GrapplingHookAndGlider-Parkour
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1677,36 +1670,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1615464733}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1676160590
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1676160591}
-  m_Layer: 0
-  m_Name: LedgeCheck
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1676160591
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1676160590}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.73, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1371772623}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1727543489
 GameObject:
   m_ObjectHideFlags: 0
@@ -1716,7 +1679,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1727543490}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: GrabEdge-Parcour
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1843,7 +1806,7 @@ GameObject:
   - component: {fileID: 1797020470}
   - component: {fileID: 1797020469}
   - component: {fileID: 1797020468}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: Cube (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2042,7 +2005,7 @@ GameObject:
   - component: {fileID: 1942907710}
   - component: {fileID: 1942907709}
   - component: {fileID: 1942907708}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: Cube (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2166,7 +2129,7 @@ GameObject:
   - component: {fileID: 2094901654}
   - component: {fileID: 2094901653}
   - component: {fileID: 2094901652}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: Cube
   m_TagString: Climbable-Object
   m_Icon: {fileID: 0}

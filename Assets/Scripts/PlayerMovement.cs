@@ -18,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
 
 	public Transform groundCheck;
 	public float groundDistance = 0.4f;
-	public LayerMask groundMask;
+	private LayerMask groundMask = ~(1 << 10);
 
 	private Vector3 velocity;
 	private bool isGrounded;
@@ -26,8 +26,6 @@ public class PlayerMovement : MonoBehaviour
 	private float z = 0f;
 	private bool spaceAbove = true;
 	private Vector3 move;
-	private Vector3 previousPos;
-	private Vector3 transformForward;
 	private float jumpVerticalDirection;
 
 	[Header("Camera")]
@@ -56,10 +54,8 @@ public class PlayerMovement : MonoBehaviour
 	private float grapplingHookLineSize = 0f;
 
 	[Header("Ledge Climb")]
-	public Transform ledgeCheck;
-	public float ledgeClimbDistance = 3f;
-	public float ledgeClimbHeightMin = 1f;
-	public float ledgeClimbHeightMax = 4.2f;
+	private int ledgeClimbLayer = 1 << 11;
+	public float ledgeClimbDistance = 1f;
 	public float ledgeClimbSpeed = 8f;
 	private Vector3 ledgeClimbObjectHitPoint;
 	private float ledgeClimbTargetHeight;
@@ -68,9 +64,8 @@ public class PlayerMovement : MonoBehaviour
 	private Vector3 ledgeClimbUpPos;
 	private LedgeClimbState ledgeState;
 	private enum LedgeClimbState {
-		ApprochObj,
 		ClimbUp,
-		CenterOnObj,
+		GoForward,
 		None
 	}
 
@@ -78,8 +73,8 @@ public class PlayerMovement : MonoBehaviour
 	public float glideHorizontalSpeed = 8f;
 	public float glideVerticalSpeed = -2f;
 
-	// This cast rays against everything except layer 8.
-	private int rayCastLayerMask = ~(1 << 8);
+	// This cast rays against everything except layer 10
+	private int rayCastLayerMask = ~(1 << 10);
 
 	private State state;
 	private enum State {
@@ -127,6 +122,7 @@ public class PlayerMovement : MonoBehaviour
 			HandleMovement();
 			HandleJump();
 			DetectClimb();
+			CheckLedgeInRange();
 			break;
 		case State.Sprint:
 			HandleMovement();
@@ -148,6 +144,7 @@ public class PlayerMovement : MonoBehaviour
 		case State.Climb:
 			HandleCamera();
 			HandleClimb();
+			CheckLedgeInRange();
 			break;
 		case State.LedgeClimb:
 			HandleLedgeClimb();
@@ -155,6 +152,7 @@ public class PlayerMovement : MonoBehaviour
 		case State.Glide:
 			HandleGlideMovement();
 			HandleCamera();
+			DetectClimb();
 			break;
 		case State.GrapplingHookThrow:
 			HandleCamera();
@@ -164,13 +162,9 @@ public class PlayerMovement : MonoBehaviour
 		case State.GrapplingHookFlying:
 			HandleCamera();
 			HandleGrapplingHookMovement();
+			CheckLedgeInRange();
 			break;
 		}
-	}
-
-	void LateUpdate() {
-		previousPos = transform.position;
-		transformForward = transform.forward;
 	}
 
 	private void HandleCamera() {
@@ -209,11 +203,11 @@ public class PlayerMovement : MonoBehaviour
 		}
 
 		if (state == State.Jump && !isGrounded) {
-			DetectLedgeClimb();
+			//DetectLedgeClimb();
 		}
 
 		if (Input.GetButtonDown("Jump") && isGrounded) {
-			DetectLedgeClimb();
+			//DetectLedgeClimb();
 			if (state != State.LedgeClimb) {
 				jumpVerticalDirection = Input.GetAxisRaw("Vertical");
 				state = State.Jump;
@@ -276,13 +270,9 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void DetectClimb() {
-		if ((Input.GetButtonDown("Jump") && !isGrounded && state == State.Normal) || (state == State.Jump && !isGrounded)) {
+		if ((Input.GetButtonDown("Jump") && !isGrounded && state == State.Normal) || (state == State.Jump && !isGrounded) || state == State.Glide) {
 			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit climbableObjectHit, ledgeClimbDistance, rayCastLayerMask)) {
 				if (climbableObjectHit.transform.tag == "Climbable-Object" && z > 0) {
-					ledgeClimbObjectHitPoint = climbableObjectHit.point;
-					ledgeClimbTargetHeight = transform.position.y + climbableObjectHit.transform.localScale.y;
-					forwardDirection = (ledgeClimbObjectHitPoint - transform.position).normalized;
-					upDirection = new Vector3(0, ledgeClimbTargetHeight, 0).normalized;
 					movementSpeed = climbSpeed;
 					state = State.Climb;
 				}
@@ -302,29 +292,26 @@ public class PlayerMovement : MonoBehaviour
 			velocity.y = -2f;
 			movementSpeed = walkSpeed;
 			state = State.Normal;
-		} 
-		if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, ledgeClimbDistance, rayCastLayerMask)) {
-			// If player is 1m from ledge, climb up (calc: climbObj.position.y + climbObj.height/2 - hitLocation.y - PlayerSize/2 <= 1)
-			if (hit.transform.localScale.y / 2 + hit.transform.position.y - hit.point.y - transform.localScale.y / 2 <= 2) {
-				state = State.LedgeClimb;
-				ledgeState = LedgeClimbState.ClimbUp;
-			}
-		} 
+		}
+
 		if (isGrounded) {
 			movementSpeed = walkSpeed;
 			state = State.Normal;
 		}
 	}
 
-	private void DetectLedgeClimb() {
-		if (Physics.Raycast(transform.position, transform.forward, out RaycastHit grappableObjectHit, ledgeClimbDistance, rayCastLayerMask)) {
-			if (grappableObjectHit.transform.localScale.y > ledgeClimbHeightMin && grappableObjectHit.transform.localScale.y < ledgeClimbHeightMax && z > 0) {
-				ledgeClimbObjectHitPoint = grappableObjectHit.point;
-				ledgeClimbTargetHeight = transform.position.y + grappableObjectHit.transform.localScale.y;
-				forwardDirection = (ledgeClimbObjectHitPoint - transform.position).normalized;
-				upDirection = new Vector3(0, ledgeClimbTargetHeight, 0).normalized;
-				state = State.LedgeClimb;
-				ledgeState = LedgeClimbState.ApprochObj;
+	private void CheckLedgeInRange() {
+		// Check if player is 1m from ledge, climb up (calc: climbObj.position.y + climbObj.height/2 - hitLocation.y - PlayerSize/2 <= 1)
+		if (z > 0) {
+			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, ledgeClimbDistance, ledgeClimbLayer)) {
+				if (hit.transform.localScale.y / 2 + hit.transform.position.y - hit.point.y - transform.localScale.y / 2 <= 2) {
+					ledgeClimbObjectHitPoint = hit.point;
+					ledgeClimbTargetHeight = hit.transform.localScale.y / 2 +  hit.transform.position.y + transform.localScale.y + 0.2f;
+					forwardDirection = (ledgeClimbObjectHitPoint - transform.position).normalized;
+					upDirection = new Vector3(0, ledgeClimbTargetHeight, 0).normalized;
+					state = State.LedgeClimb;
+					ledgeState = LedgeClimbState.ClimbUp;
+				}
 			}
 		}
 	}
@@ -332,22 +319,16 @@ public class PlayerMovement : MonoBehaviour
 	private void HandleLedgeClimb() {
 		switch (ledgeState) {
 		default:
-		case LedgeClimbState.ApprochObj:
-			controller.Move(forwardDirection * movementSpeed * Time.deltaTime);
-			if (Vector3.Distance(transform.position, ledgeClimbObjectHitPoint) < 1f) {
-				ledgeState = LedgeClimbState.ClimbUp;
-			}
-			break;
 		case LedgeClimbState.ClimbUp:
 			controller.Move(upDirection.normalized * ledgeClimbSpeed * Time.deltaTime);
 			if (transform.position.y >= ledgeClimbTargetHeight) {
 				ledgeClimbUpPos = transform.position;
-				ledgeState = LedgeClimbState.CenterOnObj;
+				ledgeState = LedgeClimbState.GoForward;
 			}
 			break;
-		case LedgeClimbState.CenterOnObj:
-			controller.Move(forwardDirection * movementSpeed * Time.deltaTime);
-			if (Vector3.Distance(transform.position, ledgeClimbUpPos) > 1f) {
+		case LedgeClimbState.GoForward:
+			controller.Move(transform.forward * 1 * ledgeClimbSpeed * Time.deltaTime);
+			if (Physics.Raycast(transform.position, -Vector3.up, out RaycastHit hit, 2f, ledgeClimbLayer)) {
 				movementSpeed = walkSpeed;
 				ledgeState = LedgeClimbState.None;
 				state = State.Normal;
@@ -410,14 +391,13 @@ public class PlayerMovement : MonoBehaviour
 		grapplingHookLineSize -= grapplingHookFlySpeed * Time.deltaTime;
 		grapplingHookTransform.localScale = new Vector3(1, 1, grapplingHookLineSize);
 
-		float reachedGrapplingHookPositionDistance = 3f;
+		float reachedGrapplingHookPositionDistance = 1f;
 		if (Vector3.Distance(transform.position, grapplingHookPosition) < reachedGrapplingHookPositionDistance) {
 			state = State.Normal;
 			velocity.y = -2f;
 			//Set grappling line length to 0
 			grapplingHookTransform.localScale = new Vector3(0f, 0f, 0f);
 			z = 1;
-			DetectLedgeClimb();
 		}
 
 		//If activated, cancels grapple
