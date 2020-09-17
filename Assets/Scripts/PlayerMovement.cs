@@ -31,7 +31,8 @@ public class PlayerMovement : MonoBehaviour
 	[Header("Camera")]
 	public Camera camera;
 	public float mouseSensivity = 200f;
-	float xRotation = 0f;
+	private float xRotation = 0f;
+	private float yRotation = 0f;
 
 	[Header("Running Slide")]
 	public float slideDuration = 1f;
@@ -142,7 +143,7 @@ public class PlayerMovement : MonoBehaviour
 			HandleSlide();
 			break;
 		case State.Climb:
-			HandleCamera();
+			HandleClimbCamera();
 			HandleClimb();
 			CheckLedgeInRange();
 			break;
@@ -176,6 +177,18 @@ public class PlayerMovement : MonoBehaviour
 
 		camera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 		transform.Rotate(Vector3.up * mouseX);
+	}
+
+	private void HandleClimbCamera() {
+		// Left/Right
+		yRotation += Input.GetAxis("Mouse X") * mouseSensivity * Time.deltaTime;
+		yRotation = Mathf.Clamp(yRotation, -60f, 60f);
+
+		// Up/Down
+		xRotation -= Input.GetAxis("Mouse Y") * mouseSensivity * Time.deltaTime;
+		xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+		camera.transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
 	}
 
 	private void HandleMovement() {
