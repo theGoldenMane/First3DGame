@@ -29,8 +29,12 @@ public class PlayerMovement : MonoBehaviour
 	private float jumpVerticalDirection;
 
 	[Header("Camera")]
-	public Camera camera;
+	public Camera firstPersonCamera;
+	public Camera thirdPersonCamera;
 	public float mouseSensivity = 200f;
+	private Camera camera;
+	private Camera currentCamera;
+	private bool firstPersonCameraActive = true;
 	private float xRotation = 0f;
 	private float yRotation = 0f;
 
@@ -95,6 +99,8 @@ public class PlayerMovement : MonoBehaviour
 		state = State.Normal;
 		ledgeState = LedgeClimbState.None;
 		movementSpeed = walkSpeed;
+		camera = firstPersonCamera;
+		currentCamera = camera;
 	}
 
 	void Start()
@@ -106,6 +112,8 @@ public class PlayerMovement : MonoBehaviour
 
 	void Update()
 	{
+		CheckCameraSwitch();
+
 		switch (state) {
 		default:
 		case State.Normal:
@@ -168,6 +176,25 @@ public class PlayerMovement : MonoBehaviour
 		}
 	}
 
+	private void CheckCameraSwitch() {
+		if(Input.GetKeyDown(KeyCode.V)) {
+			firstPersonCameraActive = !firstPersonCameraActive;
+			xRotation = 0f;
+		}
+
+		if(firstPersonCameraActive) {
+			currentCamera.gameObject.active = false;
+			currentCamera = firstPersonCamera;
+			currentCamera.gameObject.active = true;
+		} else {
+			currentCamera.gameObject.active = false;
+			currentCamera = thirdPersonCamera;
+			currentCamera.gameObject.active = true;
+		}
+
+		camera = currentCamera;
+	}
+
 	private void HandleCamera() {
 		float mouseX = Input.GetAxis("Mouse X") * mouseSensivity * Time.deltaTime;
 		float mouseY = Input.GetAxis("Mouse Y") * mouseSensivity * Time.deltaTime;
@@ -175,7 +202,9 @@ public class PlayerMovement : MonoBehaviour
 		xRotation -= mouseY;
 		xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-		camera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+		if(firstPersonCameraActive) {
+			camera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+		}
 		transform.Rotate(Vector3.up * mouseX);
 	}
 
@@ -188,7 +217,9 @@ public class PlayerMovement : MonoBehaviour
 		xRotation -= Input.GetAxis("Mouse Y") * mouseSensivity * Time.deltaTime;
 		xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-		camera.transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
+		if(firstPersonCameraActive) {
+			camera.transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
+		}
 	}
 
 	private void HandleMovement() {
