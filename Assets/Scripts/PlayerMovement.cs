@@ -79,7 +79,7 @@ public class PlayerMovement : MonoBehaviour
 	public float glideVerticalSpeed = -2f;
 
 	// This cast rays against everything except layer 10
-	private int rayCastLayerMask = ~(1 << 10);
+	private int rayCastLayerMask = 1 << 9;
 
 	private State state;
 	private enum State {
@@ -101,6 +101,7 @@ public class PlayerMovement : MonoBehaviour
 		movementSpeed = walkSpeed;
 		camera = firstPersonCamera;
 		currentCamera = camera;
+		GlobalGameManager.Instance.currentCamera = firstPersonCamera;
 	}
 
 	void Start()
@@ -192,6 +193,7 @@ public class PlayerMovement : MonoBehaviour
 			currentCamera.gameObject.active = true;
 		}
 
+		GlobalGameManager.Instance.currentCamera = currentCamera;
 		camera = currentCamera;
 	}
 
