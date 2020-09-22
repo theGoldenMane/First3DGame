@@ -59,7 +59,7 @@ public class PlayerMovement : MonoBehaviour
 	private float grapplingHookLineSize = 0f;
 
 	[Header("Ledge Climb")]
-	private int ledgeClimbLayer = 1 << 11;
+	private int climbLayer = 1 << 11;
 	public float ledgeClimbDistance = 1f;
 	public float ledgeClimbSpeed = 8f;
 	private Vector3 ledgeClimbObjectHitPoint;
@@ -78,8 +78,7 @@ public class PlayerMovement : MonoBehaviour
 	public float glideHorizontalSpeed = 8f;
 	public float glideVerticalSpeed = -2f;
 
-	// This cast rays against everything except layer 10
-	private int rayCastLayerMask = 1 << 9;
+	private int gliderLayerMask = 1 << 9;
 
 	private State state;
 	private enum State {
@@ -113,77 +112,79 @@ public class PlayerMovement : MonoBehaviour
 
 	void Update()
 	{
-		CheckCameraSwitch();
+		if (!GlobalGameManager.Instance.inInventory) {
+			CheckCameraSwitch();
 
-		switch (state) {
-		default:
-		case State.Normal:
-			HandleCamera();
-			HandleMovement();
-			HandleCrouch();
-			HandleSprint();
-			HandleGlideStart();
-			HandleGrapplingHookShot();
-			HandleJump();
-			DetectClimb();
-			break;
-		case State.Jump:
-			HandleCamera();
-			HandleMovement();
-			HandleJump();
-			DetectClimb();
-			CheckLedgeInRange();
-			break;
-		case State.Sprint:
-			HandleMovement();
-			HandleCamera();
-			HandleSprint();
-			HandleSlide();
-			HandleGrapplingHookShot();
-			HandleJump();
-			break;
-		case State.Crouch:
-			HandleCamera();
-			HandleCrouch();
-			HandleMovement();
-			break;
-		case State.Slide:
-			HandleCamera();
-			HandleSlide();
-			break;
-		case State.Climb:
-			HandleClimbCamera();
-			HandleClimb();
-			CheckLedgeInRange();
-			break;
-		case State.LedgeClimb:
-			HandleLedgeClimb();
-			break;
-		case State.Glide:
-			HandleGlideMovement();
-			HandleCamera();
-			DetectClimb();
-			break;
-		case State.GrapplingHookThrow:
-			HandleCamera();
-			HandleMovement();
-			HandleGrapplingHookThrow();
-			break;
-		case State.GrapplingHookFlying:
-			HandleCamera();
-			HandleGrapplingHookMovement();
-			CheckLedgeInRange();
-			break;
+			switch (state) {
+			default:
+			case State.Normal:
+				HandleCamera();
+				HandleMovement();
+				HandleCrouch();
+				HandleSprint();
+				HandleGlideStart();
+				HandleGrapplingHookShot();
+				HandleJump();
+				DetectClimb();
+				break;
+			case State.Jump:
+				HandleCamera();
+				HandleMovement();
+				HandleJump();
+				DetectClimb();
+				CheckLedgeInRange();
+				break;
+			case State.Sprint:
+				HandleMovement();
+				HandleCamera();
+				HandleSprint();
+				HandleSlide();
+				HandleGrapplingHookShot();
+				HandleJump();
+				break;
+			case State.Crouch:
+				HandleCamera();
+				HandleCrouch();
+				HandleMovement();
+				break;
+			case State.Slide:
+				HandleCamera();
+				HandleSlide();
+				break;
+			case State.Climb:
+				HandleClimbCamera();
+				HandleClimb();
+				CheckLedgeInRange();
+				break;
+			case State.LedgeClimb:
+				HandleLedgeClimb();
+				break;
+			case State.Glide:
+				HandleGlideMovement();
+				HandleCamera();
+				DetectClimb();
+				break;
+			case State.GrapplingHookThrow:
+				HandleCamera();
+				HandleMovement();
+				HandleGrapplingHookThrow();
+				break;
+			case State.GrapplingHookFlying:
+				HandleCamera();
+				HandleGrapplingHookMovement();
+				CheckLedgeInRange();
+				break;
+			}
 		}
 	}
 
 	private void CheckCameraSwitch() {
-		if(Input.GetKeyDown(KeyCode.V)) {
+		if (Input.GetKeyDown(KeyCode.V)) {
 			firstPersonCameraActive = !firstPersonCameraActive;
 			xRotation = 0f;
 		}
 
-		if(firstPersonCameraActive) {
+		if (firstPersonCameraActive) {
 			currentCamera.gameObject.active = false;
 			currentCamera = firstPersonCamera;
 			currentCamera.gameObject.active = true;
@@ -204,7 +205,7 @@ public class PlayerMovement : MonoBehaviour
 		xRotation -= mouseY;
 		xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-		if(firstPersonCameraActive) {
+		if (firstPersonCameraActive) {
 			camera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 		}
 		transform.Rotate(Vector3.up * mouseX);
@@ -219,7 +220,7 @@ public class PlayerMovement : MonoBehaviour
 		xRotation -= Input.GetAxis("Mouse Y") * mouseSensivity * Time.deltaTime;
 		xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-		if(firstPersonCameraActive) {
+		if (firstPersonCameraActive) {
 			camera.transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
 		}
 	}
@@ -317,7 +318,7 @@ public class PlayerMovement : MonoBehaviour
 
 	private void DetectClimb() {
 		if ((Input.GetButtonDown("Jump") && !isGrounded && state == State.Normal) || (state == State.Jump && !isGrounded) || state == State.Glide) {
-			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit climbableObjectHit, ledgeClimbDistance, rayCastLayerMask)) {
+			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit climbableObjectHit, ledgeClimbDistance, climbLayer)) {
 				if (climbableObjectHit.transform.tag == "Climbable-Object" && z > 0) {
 					movementSpeed = climbSpeed;
 					state = State.Climb;
@@ -349,7 +350,7 @@ public class PlayerMovement : MonoBehaviour
 	private void CheckLedgeInRange() {
 		// Check if player is 1m from ledge, climb up (calc: climbObj.position.y + climbObj.height/2 - hitLocation.y - PlayerSize/2 <= 1)
 		if (z > 0) {
-			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, ledgeClimbDistance, ledgeClimbLayer)) {
+			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, ledgeClimbDistance, climbLayer)) {
 				if (hit.transform.localScale.y / 2 + hit.transform.position.y - hit.point.y - transform.localScale.y / 2 <= 2) {
 					ledgeClimbObjectHitPoint = hit.point;
 					ledgeClimbTargetHeight = hit.transform.localScale.y / 2 +  hit.transform.position.y + transform.localScale.y + 0.2f;
@@ -374,7 +375,7 @@ public class PlayerMovement : MonoBehaviour
 			break;
 		case LedgeClimbState.GoForward:
 			controller.Move(transform.forward * 1 * ledgeClimbSpeed * Time.deltaTime);
-			if (Physics.Raycast(transform.position, -Vector3.up, out RaycastHit hit, 2f, ledgeClimbLayer)) {
+			if (Physics.Raycast(transform.position, -Vector3.up, out RaycastHit hit, 2f, climbLayer)) {
 				movementSpeed = walkSpeed;
 				ledgeState = LedgeClimbState.None;
 				state = State.Normal;
@@ -406,7 +407,7 @@ public class PlayerMovement : MonoBehaviour
 
 	private void HandleGrapplingHookShot() {
 		if (Input.GetButtonDown("Throw Hook")) {
-			if (Physics.Raycast(camera.transform.position, camera.transform.forward, out RaycastHit raycastHit, maxGrappleDistance, rayCastLayerMask))
+			if (Physics.Raycast(camera.transform.position, camera.transform.forward, out RaycastHit raycastHit, maxGrappleDistance, gliderLayerMask | climbLayer))
 			{
 				//animator.SetBool("throwHook", true);
 				grapplingHookPosition = raycastHit.point;
@@ -463,7 +464,7 @@ public class PlayerMovement : MonoBehaviour
 	void OnGUI()
 	{
 		Texture2D img;
-		if (Physics.Raycast(camera.transform.position, camera.transform.forward, out RaycastHit raycastHit, maxGrappleDistance, rayCastLayerMask)) {
+		if (Physics.Raycast(camera.transform.position, camera.transform.forward, out RaycastHit raycastHit, maxGrappleDistance, gliderLayerMask | climbLayer)) {
 			img = crosshairImageDefault;
 		} else {
 			img = crosshairImageOnObject;
