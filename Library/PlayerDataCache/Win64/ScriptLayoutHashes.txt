@@ -160,3 +160,9 @@ df434544c9f7b33d1cc7e635b180d279 Unity.TextMeshPro.dll:TMPro.TextMeshPro
 3165968ba45c74472d279ba04455fccb Unity.TextMeshPro.dll:TMPro.TMP_ColorGradient
 ab846589e4b41f40dcc5cb8a798e0797 Assembly-CSharp.dll:.GlobalGameManager
 8649814970b42d345b89944b862453cc Unity.TextMeshPro.dll:TMPro.TMP_SubMesh
+038548527e568507fd6b5876be32fdb8 Assembly-CSharp.dll:.Item
+17e54309cf4e59bdfdbbb8d16c59b752 Assembly-CSharp.dll:.ItemPickup
+b04d548399136052f80f7efa8a039d23 Assembly-CSharp.dll:.Inventory
+9073aedc6c82832dd6154e1db0dfabe1 Assembly-CSharp.dll:.InventoryUI
+a1bf635396aab30e2e06177ccab020a6 Assembly-CSharp.dll:.InventorySlot
+9073aedc6c82832dd6154e1db0dfabe1 Assembly-CSharp.dll:.HotbarUI
