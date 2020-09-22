@@ -7,5 +7,5 @@ public class Item : ScriptableObject
 	public int id;
 	new public string name = "New Item";
 	public Sprite icon = null;
-
+	public GameObject prefab = null;
 }
