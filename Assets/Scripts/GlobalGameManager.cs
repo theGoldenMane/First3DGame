@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GlobalGameManager : MonoBehaviour
 {
-	public static GlobalGameManager Instance;
+	public static GlobalGameManager instance;
 	public Camera currentCamera;
 
 	[Header("Menus")]
@@ -17,14 +17,14 @@ public class GlobalGameManager : MonoBehaviour
 		Inventory
 	}
 
-    void Awake ()
+	void Awake ()
 	{
-		if (Instance == null)
+		if (instance == null)
 		{
 			DontDestroyOnLoad(gameObject);
-			Instance = this;
+			instance = this;
 		}
-		else if (Instance != this)
+		else if (instance != this)
 		{
 			Destroy (gameObject);
 		}
@@ -47,7 +47,7 @@ public class GlobalGameManager : MonoBehaviour
 	}
 
 	void OpenInventory() {
-		if(Input.GetKeyDown(KeyCode.Tab)) {
+		if (Input.GetKeyDown(KeyCode.Tab)) {
 			inInventory = true;
 			Cursor.lockState = CursorLockMode.None;
 			inventory.gameObject.active = true;
@@ -56,7 +56,7 @@ public class GlobalGameManager : MonoBehaviour
 	}
 
 	void CloseInventory() {
-		if(Input.GetKeyDown(KeyCode.Tab)) {
+		if (Input.GetKeyDown(KeyCode.Tab)) {
 			inInventory = false;
 			Cursor.lockState = CursorLockMode.Locked;
 			inventory.gameObject.active = false;
