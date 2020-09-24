@@ -10,9 +10,7 @@ public class Inventory : MonoBehaviour
 	public delegate void OnItemChange();
 	public OnItemChange onItemChangedCallback;
 
-	public int space = 25;
-	public List<Item> items = new List<Item>();
-
+	public Item[] items;
 
 	void Awake ()
 	{
@@ -27,9 +25,13 @@ public class Inventory : MonoBehaviour
 		}
 	}
 
+	void Start() {
+		items = new Item[25];
+	}
+
 	void Update () {
 		if (GlobalGameManager.instance.inInventory) {
-			if (EventSystem.current.currentSelectedGameObject && items.Count > 0) {
+			if (EventSystem.current.currentSelectedGameObject && items.Length > 0) {
 				if (Input.GetKeyDown(KeyCode.O)) {
 					int slotIndex = EventSystem.current.currentSelectedGameObject.transform.parent.transform.GetSiblingIndex();
 					Drop(items[slotIndex]);
@@ -42,13 +44,26 @@ public class Inventory : MonoBehaviour
 	}
 
 	public bool Add (Item item) {
-		if (items.Count < space) {
-			items.Add(item);
+		// Get first empty array slot
+		int indexOfEmpty = -1;
+		for (int i = 0; i < items.Length; i++) {
+			if (items[i] == null) {
+				indexOfEmpty = i;
+				break;
+			}
+		}
+
+		// If empty slot exists, add item to it
+		if (indexOfEmpty > -1) {
+			items[indexOfEmpty] = item;
 			if (onItemChangedCallback != null) {
 				onItemChangedCallback.Invoke();
 			}
 			return true;
+		} else {
+			Debug.LogWarning("No space in Inventory");
 		}
+
 		return false;
 	}
 
@@ -58,11 +73,13 @@ public class Inventory : MonoBehaviour
 		GameObject prefab = items[slotIndex].prefab;
 
 		Vector3 spawnPos = player.transform.position + player.transform.forward * 2f;
-		Physics.Raycast(player.transform.position, Vector3.down, out RaycastHit hit, 5f, (1<<9));
+		Physics.Raycast(player.transform.position, Vector3.down, out RaycastHit hit, 5f, (1 << 9));
 		spawnPos.y = hit.point.y + items[slotIndex].prefab.transform.localScale.y / 2 + 0.1f;
-						
+
 		Instantiate(prefab, spawnPos, Quaternion.identity);
-		items.Remove(item);
+
+		int index = System.Array.IndexOf(items, item);
+		if (index != -1) items[index] = null;
 
 		if (onItemChangedCallback != null) {
 			onItemChangedCallback.Invoke();
@@ -70,7 +87,8 @@ public class Inventory : MonoBehaviour
 	}
 
 	public void Destroy (Item item) {
-		items.Remove(item);
+		int index = System.Array.IndexOf(items, item);
+		if (index != -1) items[index] = null;
 		if (onItemChangedCallback != null) {
 			onItemChangedCallback.Invoke();
 		}

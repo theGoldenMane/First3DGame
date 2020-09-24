@@ -1,6 +1,6 @@
 Win64
 PlayerPath?
-D:/Git Repos/Firt3DGameBuild/First3DGame.exe
+D:/Git Repos/First3DGameBuild/First3DGame.exe
 SceneListBegin?
 Assets/Scenes/SampleScene.unity
 SceneListEnd?
@@ -158,7 +158,7 @@ fb6a1ea36b4f6ef5948d283d93760765 UnityEngine.GoogleAudioSpatializer.dll:UnityEng
 3b760e6526e13f7504f59e210145899a Unity.TextMeshPro.dll:TMPro.TextMeshProUGUI
 507174d46dacbc5fe45e28485db5dd1e Unity.Analytics.DataPrivacy.dll:UnityEngine.Analytics.DataPrivacyButton
 d251bf88db6c95a6b1aa0b69298da9ef UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
-b04d548399136052f80f7efa8a039d23 Assembly-CSharp.dll:.Inventory
+1338a14211be79ff81ec931c540bc184 Assembly-CSharp.dll:.Inventory
 d791aa6007fa3640be1164ea75bb087d Unity.TextMeshPro.dll:TMPro.TMP_StyleSheet
 b5bc56d1c4d3911eca6544756dd357a9 Assembly-CSharp.dll:.PlayerMovement
 a89ea044410a879b67385010d3a6726b Assembly-CSharp.dll:.PlayerActions
