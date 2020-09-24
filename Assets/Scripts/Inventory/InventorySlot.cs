@@ -8,13 +8,12 @@ public class InventorySlot : MonoBehaviour,
    IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
 {
    public Image icon;
+   private Item item;
+
    private float left = 0f;
    private float right = 0f;
    private float top = 0f;
    private float bottom = 0f;
-
-   Item item;
-
    private bool dragging = false;
 
    public void AddItem(Item newItem) {
@@ -32,6 +31,8 @@ public class InventorySlot : MonoBehaviour,
    public void OnBeginDrag(PointerEventData eventData)
    {
       if (item != null) {
+         icon.raycastTarget = false;
+
          RectTransform imgTrans = icon.GetComponent<RectTransform>();
          left = imgTrans.offsetMin.x;
          bottom = imgTrans.offsetMin.y;
@@ -41,6 +42,8 @@ public class InventorySlot : MonoBehaviour,
          icon.transform.position = transform.position;
          icon.enabled = true;
          dragging = true;
+
+         EventSystem.current.SetSelectedGameObject(null);
       }
    }
 
@@ -51,32 +54,34 @@ public class InventorySlot : MonoBehaviour,
       }
    }
 
-   public void OnDrop(PointerEventData data) {}
+   public void OnDrop(PointerEventData data) {
+   }
 
    public void OnEndDrag(PointerEventData eventData)
    {
-      Debug.Log(eventData.hovered.Count);
-      List<GameObject> list = eventData.hovered;
-      for (int i = 0; i < list.Count; i++) {
-         Debug.Log(list[i]);
-      }
-
       if (dragging) {
-         string hoveredItem = eventData.hovered[eventData.hovered.Count - 1].name;
+         GameObject hoveredItem = eventData.pointerCurrentRaycast.gameObject;
 
-         if (hoveredItem == "Button") {
-            // Move item to empty field
-            Debug.Log("Move item to " + eventData.hovered[eventData.hovered.Count - 2].name);
-         } else if (hoveredItem == "Icon") {
-            // Swap items
-            Debug.Log("Swap" + eventData.hovered[eventData.hovered.Count - 2].name);
+         if (hoveredItem == null) {
+            // Drop item
+            Inventory.instance.Drop(transform.GetSiblingIndex());
          } else {
-            //Drop Item
-            Inventory.instance.Drop(item);
+            int slotNr = hoveredItem.transform.parent.transform.GetSiblingIndex();
+            if (Inventory.instance.items[slotNr] == null) {
+               // Move item to empty field
+               Inventory.instance.Move(transform.GetSiblingIndex(), slotNr);
+            } else if (hoveredItem.name == "Trash") {
+               // Destroy item
+               Inventory.instance.Destroy(transform.GetSiblingIndex());
+            } else {
+               // Swap items
+               Inventory.instance.Swap(transform.GetSiblingIndex(), hoveredItem.transform.parent.transform.parent.transform.GetSiblingIndex());
+            }
          }
          icon.GetComponent<RectTransform>().offsetMin = new Vector2 (left, bottom);
          icon.GetComponent<RectTransform>().offsetMax = new Vector2 (right, top);
          dragging = false;
+         icon.raycastTarget = true;
       }
    }
 }

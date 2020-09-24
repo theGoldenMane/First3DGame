@@ -29,20 +29,6 @@ public class Inventory : MonoBehaviour
 		items = new Item[25];
 	}
 
-	void Update () {
-		if (GlobalGameManager.instance.inInventory) {
-			if (EventSystem.current.currentSelectedGameObject && items.Length > 0) {
-				if (Input.GetKeyDown(KeyCode.O)) {
-					int slotIndex = EventSystem.current.currentSelectedGameObject.transform.parent.transform.GetSiblingIndex();
-					Drop(items[slotIndex]);
-				} else if (Input.GetKeyDown(KeyCode.X)) {
-					int slotIndex = EventSystem.current.currentSelectedGameObject.transform.parent.transform.GetSiblingIndex();
-					Destroy(items[slotIndex]);
-				}
-			}
-		}
-	}
-
 	public bool Add (Item item) {
 		// Get first empty array slot
 		int indexOfEmpty = -1;
@@ -67,28 +53,40 @@ public class Inventory : MonoBehaviour
 		return false;
 	}
 
-	public void Drop (Item item) {
+	public void Drop (int itemIndex) {
 		GameObject player = GameObject.FindGameObjectWithTag("Player");
-		int slotIndex = EventSystem.current.currentSelectedGameObject.transform.parent.transform.GetSiblingIndex();
-		GameObject prefab = items[slotIndex].prefab;
+		GameObject prefab = items[itemIndex].prefab;
 
 		Vector3 spawnPos = player.transform.position + player.transform.forward * 2f;
 		Physics.Raycast(player.transform.position, Vector3.down, out RaycastHit hit, 5f, (1 << 9));
-		spawnPos.y = hit.point.y + items[slotIndex].prefab.transform.localScale.y / 2 + 0.1f;
-
+		spawnPos.y = hit.point.y + items[itemIndex].prefab.transform.localScale.y / 2 + 0.1f;
 		Instantiate(prefab, spawnPos, Quaternion.identity);
 
-		int index = System.Array.IndexOf(items, item);
-		if (index != -1) items[index] = null;
-
+		items[itemIndex] = null;
 		if (onItemChangedCallback != null) {
 			onItemChangedCallback.Invoke();
 		}
 	}
 
-	public void Destroy (Item item) {
-		int index = System.Array.IndexOf(items, item);
-		if (index != -1) items[index] = null;
+	public void Destroy (int itemIndex) {
+		items[itemIndex] = null;
+		if (onItemChangedCallback != null) {
+			onItemChangedCallback.Invoke();
+		}
+	}
+
+	public void Move(int oldIndex, int newIndex) {
+		items[newIndex] = items[oldIndex];
+		items[oldIndex] = null;
+		if (onItemChangedCallback != null) {
+			onItemChangedCallback.Invoke();
+		}
+	}
+
+	public void Swap(int swapIndexA, int swapIndexB) {
+		Item tmp = items[swapIndexA];
+		items[swapIndexA] = items[swapIndexB];
+		items[swapIndexB] = tmp;
 		if (onItemChangedCallback != null) {
 			onItemChangedCallback.Invoke();
 		}
