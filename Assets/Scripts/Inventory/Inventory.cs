@@ -31,6 +31,8 @@ public class Inventory : MonoBehaviour
 		amounts = new int[25];
 	}
 
+
+
 	public int Add (Item item, int amount) {
 		int returnValue = 0;
 		bool inventoryChanged = true;
@@ -55,7 +57,7 @@ public class Inventory : MonoBehaviour
 				}
 			} else {
 				// Combine stacks
-				amounts[itemExistsIndex] = amount + amounts[itemExistsIndex];
+				amounts[itemExistsIndex] = newAmount;
 			}
 		} else {
 			// Check if inventoy has empty slots
@@ -86,7 +88,7 @@ public class Inventory : MonoBehaviour
 		Vector3 spawnPos = player.transform.position + player.transform.forward * 2f;
 		Physics.Raycast(player.transform.position, Vector3.down, out RaycastHit hit, 5f, (1 << 9));
 		spawnPos.y = hit.point.y + items[itemIndex].prefab.transform.localScale.y / 2 + 0.1f;
-		Instantiate(prefab, spawnPos, Quaternion.identity);
+		Instantiate(prefab, spawnPos, Quaternion.identity).GetComponent<ItemPickup>().amount = amounts[itemIndex];
 
 		items[itemIndex] = null;
 		if (onItemChangedCallback != null) {
@@ -103,17 +105,69 @@ public class Inventory : MonoBehaviour
 
 	public void Move(int oldIndex, int newIndex) {
 		items[newIndex] = items[oldIndex];
-		items[oldIndex] = null;
+		amounts[newIndex] = amounts[oldIndex];
+		Destroy(oldIndex);
 		if (onItemChangedCallback != null) {
 			onItemChangedCallback.Invoke();
 		}
 	}
 
 	public void Swap(int swapIndexA, int swapIndexB) {
-		Item tmp = items[swapIndexA];
-		items[swapIndexA] = items[swapIndexB];
-		items[swapIndexB] = tmp;
+		if (items[swapIndexA] == items[swapIndexB]) {
+			Item item = items[swapIndexB];
+			int newAmount = amounts[swapIndexA] + amounts[swapIndexB];
+			if (newAmount > item.maxStackSize) {
+				// Max stack size exceeded -> fill one until max
+				amounts[swapIndexB] = item.maxStackSize;
+				amounts[swapIndexA] = newAmount - item.maxStackSize;
+			} else {
+				// Combine stacks
+				amounts[swapIndexB] = newAmount;
+				Destroy(swapIndexA);
+			}
+		} else {
+			Item tmp = items[swapIndexA];
+			items[swapIndexA] = items[swapIndexB];
+			items[swapIndexB] = tmp;
+		}
+
+		// Fire GUI update event
 		if (onItemChangedCallback != null) {
+			onItemChangedCallback.Invoke();
+		}
+	}
+
+	public void SplitStack(int itemIndex) {
+		bool inventoryChanged = false;
+		// Split stack if item exists in this slot and stack is greater 1
+		int amount = amounts[itemIndex];
+		if (items[itemIndex] != null && amounts[itemIndex] > 1) {
+			// Check if there would be space for second stack
+			int indexOfEmpty = GetFirstEmptySlot();
+			if (indexOfEmpty > -1) {
+				int firstStack;
+				int secondStack;
+				// Check if stack has even amount
+				if (amount % 2 != 0) {
+					// Odd
+					firstStack = amount / 2;
+					secondStack = amount / 2 + 1;
+				} else {
+					// Even
+					firstStack = amount / 2;
+					secondStack = firstStack;
+				}
+
+				amounts[itemIndex] = firstStack;
+				items[indexOfEmpty] = items[itemIndex];
+				amounts[indexOfEmpty] = secondStack;
+
+				inventoryChanged = true;
+			}
+		}
+
+		// Fire GUI update event if inventory items/amount changed
+		if (inventoryChanged && onItemChangedCallback != null) {
 			onItemChangedCallback.Invoke();
 		}
 	}
