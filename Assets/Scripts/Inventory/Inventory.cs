@@ -11,6 +11,7 @@ public class Inventory : MonoBehaviour
 	public OnItemChange onItemChangedCallback;
 
 	public Item[] items;
+	public int[] amounts;
 
 	void Awake ()
 	{
@@ -27,30 +28,55 @@ public class Inventory : MonoBehaviour
 
 	void Start() {
 		items = new Item[25];
+		amounts = new int[25];
 	}
 
-	public bool Add (Item item) {
-		// Get first empty array slot
-		int indexOfEmpty = -1;
-		for (int i = 0; i < items.Length; i++) {
-			if (items[i] == null) {
-				indexOfEmpty = i;
-				break;
-			}
-		}
+	public int Add (Item item, int amount) {
+		int returnValue = 0;
+		bool inventoryChanged = true;
 
-		// If empty slot exists, add item to it
-		if (indexOfEmpty > -1) {
-			items[indexOfEmpty] = item;
-			if (onItemChangedCallback != null) {
-				onItemChangedCallback.Invoke();
+		// Check if item already exists in inventory
+		int itemExistsIndex = ItemAlreadyInInventory(item);
+		if (itemExistsIndex > -1) {
+			int newAmount = amount + amounts[itemExistsIndex];
+			if (newAmount > item.maxStackSize) {
+				// Check if inventoy has empty slots
+				int indexOfEmpty = GetFirstEmptySlot();
+				if (indexOfEmpty > -1) {
+					// Max stack size exceeded & space in inventory -> new additional stack
+					amounts[itemExistsIndex] = item.maxStackSize;
+					items[indexOfEmpty] = item;
+					amounts[indexOfEmpty] = newAmount - item.maxStackSize;
+				} else {
+					// Max stack size exceeded & inventory full -> fill stack unil max amount and leave rest
+					amounts[itemExistsIndex] = item.maxStackSize;
+					returnValue = newAmount - item.maxStackSize;
+					Debug.LogWarning("Can't pick up all, not enough space in Inventory");
+				}
+			} else {
+				// Combine stacks
+				amounts[itemExistsIndex] = amount + amounts[itemExistsIndex];
 			}
-			return true;
 		} else {
-			Debug.LogWarning("No space in Inventory");
+			// Check if inventoy has empty slots
+			int indexOfEmpty = GetFirstEmptySlot();
+			if (indexOfEmpty > -1) {
+				// New stack
+				items[indexOfEmpty] = item;
+				amounts[indexOfEmpty] = amount;
+			} else {
+				inventoryChanged = false;
+				returnValue = amount;
+				Debug.LogWarning("Can't pick up -> no space in Inventory");
+			}
 		}
 
-		return false;
+		// Fire GUI update event if inventory items/amount changed
+		if (inventoryChanged && onItemChangedCallback != null) {
+			onItemChangedCallback.Invoke();
+		}
+
+		return returnValue;
 	}
 
 	public void Drop (int itemIndex) {
@@ -90,5 +116,25 @@ public class Inventory : MonoBehaviour
 		if (onItemChangedCallback != null) {
 			onItemChangedCallback.Invoke();
 		}
+	}
+
+	private int GetFirstEmptySlot() {
+		int indexOfEmpty = -1;
+		for (int i = 0; i < items.Length; i++) {
+			if (items[i] == null) {
+				indexOfEmpty = i;
+				break;
+			}
+		}
+		return indexOfEmpty;
+	}
+
+	private int ItemAlreadyInInventory(Item item) {
+		for (int i = 0; i < items.Length; i++) {
+			if (items[i] == item) {
+				return i;
+			}
+		}
+		return -1;
 	}
 }

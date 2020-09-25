@@ -8,6 +8,7 @@ public class InventorySlot : MonoBehaviour,
    IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
 {
    public Image icon;
+   public Text amount;
    private Item item;
 
    private float left = 0f;
@@ -16,16 +17,20 @@ public class InventorySlot : MonoBehaviour,
    private float bottom = 0f;
    private bool dragging = false;
 
-   public void AddItem(Item newItem) {
+   public void AddItem(Item newItem, int newAmount) {
       item = newItem;
       icon.sprite = item.icon;
       icon.enabled = true;
+      amount.text = newAmount.ToString();
+      amount.enabled = true;
    }
 
    public void ClearSlot() {
       item = null;
       icon.sprite = null;
       icon.enabled = false;
+      amount.text = "";
+      amount.enabled = false;
    }
 
    public void OnBeginDrag(PointerEventData eventData)
