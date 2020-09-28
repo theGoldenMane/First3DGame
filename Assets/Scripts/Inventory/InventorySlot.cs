@@ -11,6 +11,10 @@ public class InventorySlot : MonoBehaviour,
    public Text amount;
    private Item item;
 
+   private Transform originalParent;
+   private int originalIndex;
+   private GameObject clone;
+
    private float left = 0f;
    private float right = 0f;
    private float top = 0f;
@@ -36,6 +40,13 @@ public class InventorySlot : MonoBehaviour,
    public void OnBeginDrag(PointerEventData eventData)
    {
       if (item != null) {
+         originalParent = transform.parent;
+         originalIndex = transform.GetSiblingIndex();
+         clone = Instantiate(gameObject);
+         clone.transform.SetParent(originalParent);
+         clone.transform.SetSiblingIndex(originalIndex);
+         transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, true);
+
          icon.raycastTarget = false;
 
          RectTransform imgTrans = icon.GetComponent<RectTransform>();
@@ -46,6 +57,7 @@ public class InventorySlot : MonoBehaviour,
 
          icon.transform.position = transform.position;
          icon.enabled = true;
+         amount.enabled = false;
          dragging = true;
 
          EventSystem.current.SetSelectedGameObject(null);
@@ -74,18 +86,23 @@ public class InventorySlot : MonoBehaviour,
             int slotNr = hoveredItem.transform.parent.transform.GetSiblingIndex();
             if (Inventory.instance.items[slotNr] == null) {
                // Move item to empty field
-               Inventory.instance.Move(transform.GetSiblingIndex(), slotNr);
+               Inventory.instance.Move(originalIndex, slotNr);
             } else if (hoveredItem.name == "Trash") {
                // Destroy item
-               Inventory.instance.Destroy(transform.GetSiblingIndex());
+               Inventory.instance.Destroy(originalIndex);
             } else {
                // Swap items
-               Inventory.instance.Swap(transform.GetSiblingIndex(), hoveredItem.transform.parent.transform.parent.transform.GetSiblingIndex());
+               Inventory.instance.Swap(originalIndex, hoveredItem.transform.parent.transform.parent.transform.GetSiblingIndex());
             }
          }
+         Destroy(clone);
+         transform.SetParent(originalParent, true);
+         transform.SetSiblingIndex(originalIndex);
+
          icon.GetComponent<RectTransform>().offsetMin = new Vector2 (left, bottom);
          icon.GetComponent<RectTransform>().offsetMax = new Vector2 (right, top);
          dragging = false;
+         amount.enabled = true;
          icon.raycastTarget = true;
       }
    }

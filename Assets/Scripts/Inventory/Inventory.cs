@@ -31,8 +31,6 @@ public class Inventory : MonoBehaviour
 		amounts = new int[25];
 	}
 
-
-
 	public int Add (Item item, int amount) {
 		int returnValue = 0;
 		bool inventoryChanged = true;

@@ -64,6 +64,7 @@
      <Compile Include="Assets\Scripts\Inventory\ItemPickup.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerActions.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
+     <Compile Include="Assets\Scripts\Storage\StorageController.cs" />
      <None Include="Assets\SkySerie Freebie\Hdri setup.txt" />
  <Reference Include="Unity.TextMeshPro.Editor">
  <HintPath>D:/Git Repos/First3DGame/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>

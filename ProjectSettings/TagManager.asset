@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Climbable-Object
+  - Pick-Up
+  - Storage
+  - Canvas
   layers:
   - Default
   - TransparentFX

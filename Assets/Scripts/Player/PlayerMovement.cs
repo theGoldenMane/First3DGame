@@ -105,14 +105,13 @@ public class PlayerMovement : MonoBehaviour
 
 	void Start()
 	{
-		//Lock Cursor
 		Cursor.lockState = CursorLockMode.Locked;
 	}
 
 
 	void Update()
 	{
-		if (!GlobalGameManager.instance.inInventory) {
+		if (!GlobalGameManager.instance.inMenu) {
 			CheckCameraSwitch();
 
 			switch (state) {
