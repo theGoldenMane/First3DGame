@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   name: Cube
-  icon: {fileID: 21300000, guid: 05e2541a7c6ff534c9f96bd912a4fac1, type: 3}
+  icon: {fileID: 21300000, guid: caa6f9ac69274204c852345e680f5a7e, type: 3}
   prefab: {fileID: 3469837755530989781, guid: 8768d7e617d39714993f52d8e63b0b74, type: 3}
   maxStackSize: 10

@@ -86,7 +86,9 @@ public class Inventory : MonoBehaviour
 		Vector3 spawnPos = player.transform.position + player.transform.forward * 2f;
 		Physics.Raycast(player.transform.position, Vector3.down, out RaycastHit hit, 5f, (1 << 9));
 		spawnPos.y = hit.point.y + items[itemIndex].prefab.transform.localScale.y / 2 + 0.1f;
-		Instantiate(prefab, spawnPos, Quaternion.identity).GetComponent<ItemPickup>().amount = amounts[itemIndex];
+		GameObject dropedItem = Instantiate(prefab, spawnPos, Quaternion.identity);
+		dropedItem.GetComponent<ItemPickup>().amount = amounts[itemIndex];
+		dropedItem.tag = "Pick-Up";
 
 		items[itemIndex] = null;
 		if (onItemChangedCallback != null) {
@@ -148,8 +150,8 @@ public class Inventory : MonoBehaviour
 				// Check if stack has even amount
 				if (amount % 2 != 0) {
 					// Odd
-					firstStack = amount / 2;
-					secondStack = amount / 2 + 1;
+					firstStack = amount / 2 +1 ;
+					secondStack = amount / 2;
 				} else {
 					// Even
 					firstStack = amount / 2;
@@ -183,7 +185,7 @@ public class Inventory : MonoBehaviour
 
 	private int ItemAlreadyInInventory(Item item) {
 		for (int i = 0; i < items.Length; i++) {
-			if (items[i] == item) {
+			if (items[i] == item && amounts[i] < item.maxStackSize) {
 				return i;
 			}
 		}

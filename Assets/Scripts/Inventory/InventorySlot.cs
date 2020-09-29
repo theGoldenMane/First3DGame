@@ -80,21 +80,23 @@ public class InventorySlot : MonoBehaviour,
          GameObject hoveredItem = eventData.pointerCurrentRaycast.gameObject;
 
          if (hoveredItem == null) {
-            // Drop item
-            Inventory.instance.Drop(transform.GetSiblingIndex());
+            Inventory.instance.Drop(originalIndex);
          } else {
             int slotNr = hoveredItem.transform.parent.transform.GetSiblingIndex();
-            if (Inventory.instance.items[slotNr] == null) {
-               // Move item to empty field
-               Inventory.instance.Move(originalIndex, slotNr);
-            } else if (hoveredItem.name == "Trash") {
-               // Destroy item
-               Inventory.instance.Destroy(originalIndex);
-            } else {
-               // Swap items
-               Inventory.instance.Swap(originalIndex, hoveredItem.transform.parent.transform.parent.transform.GetSiblingIndex());
+            if (hoveredItem.transform.parent.transform.parent.name != "DragParent" || hoveredItem.name == "Background") {
+               if (Inventory.instance.items[slotNr] == null) {
+                  // Move item to empty field
+                  Inventory.instance.Move(originalIndex, slotNr);
+               } else if (hoveredItem.name == "Trash") {
+                  // Destroy item
+                  Inventory.instance.Destroy(originalIndex);
+               } else {
+                  // Swap items
+                  Inventory.instance.Swap(originalIndex, hoveredItem.transform.parent.transform.parent.transform.GetSiblingIndex());
+               }
             }
          }
+
          Destroy(clone);
          transform.SetParent(originalParent, true);
          transform.SetSiblingIndex(originalIndex);
