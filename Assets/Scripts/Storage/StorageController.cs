@@ -8,13 +8,12 @@ public class StorageController : MonoBehaviour
 	public GameObject storageInventory;
 
     public void OpenStorage() {
-    	animator.SetBool("OpenChest", true);
+    	animator.SetBool("ChestOpen", true);
     	storageInventory.active = true;
     }
 
     public void CloseStorage() {
-    	animator.SetBool("OpenChest", false);
-    	animator.SetBool("CloseChest", true);
+    	animator.SetBool("ChestOpen", false);
     	storageInventory.active = false;
     }
 }

@@ -132,6 +132,7 @@ public class PlayerMovement : MonoBehaviour
 				HandleJump();
 				DetectClimb();
 				CheckLedgeInRange();
+				HandleGlideStart();
 				break;
 			case State.Sprint:
 				HandleMovement();
@@ -178,7 +179,7 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void CheckCameraSwitch() {
-		if (Input.GetKeyDown(KeyCode.V)) {
+		if (Input.GetKeyDown(KeyBindings.instance.switchCameras)) {
 			firstPersonCameraActive = !firstPersonCameraActive;
 			xRotation = 0f;
 		}
@@ -252,7 +253,7 @@ public class PlayerMovement : MonoBehaviour
 			//DetectLedgeClimb();
 		}
 
-		if (Input.GetButtonDown("Jump") && isGrounded) {
+		if (Input.GetKeyDown(KeyBindings.instance.jump) && isGrounded) {
 			//DetectLedgeClimb();
 			if (state != State.LedgeClimb) {
 				jumpVerticalDirection = Input.GetAxisRaw("Vertical");
@@ -267,7 +268,7 @@ public class PlayerMovement : MonoBehaviour
 
 	private void HandleSprint() {
 		// Sprint if player isn't moving backwards
-		if (Input.GetButton("Sprint") && !Input.GetKey(KeyCode.S) && state != State.Jump) {
+		if (Input.GetKey(KeyBindings.instance.sprint) && !Input.GetKey(KeyCode.S) && state != State.Jump) {
 			movementSpeed = sprintSpeed;
 			state = State.Sprint;
 		} else if (state == State.Sprint) {
@@ -277,10 +278,10 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void HandleCrouch() {
-		if (Input.GetButtonDown("Crouch") && state == State.Normal) {
+		if (Input.GetKeyDown(KeyBindings.instance.crouch) && state == State.Normal) {
 			Crouch();
 			state = State.Crouch;
-		} else if ((Input.GetButtonUp("Crouch") && state == State.Crouch) || !spaceAbove) {
+		} else if ((Input.GetKeyUp(KeyBindings.instance.crouch) && state == State.Crouch) || !spaceAbove) {
 			if (StandUp()) {
 				state = State.Normal;
 			}
@@ -288,7 +289,7 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void HandleSlide() {
-		if (Input.GetButton("Crouch") && state == State.Sprint) {
+		if (Input.GetKey(KeyBindings.instance.crouch) && state == State.Sprint) {
 			Crouch();
 			state = State.Slide;
 			slideX = Input.GetAxis("Horizontal");
@@ -316,7 +317,7 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void DetectClimb() {
-		if ((Input.GetButtonDown("Jump") && !isGrounded && state == State.Normal) || (state == State.Jump && !isGrounded) || state == State.Glide) {
+		if ((Input.GetKeyDown(KeyBindings.instance.jump) && !isGrounded && state == State.Normal) || (state == State.Jump && !isGrounded) || state == State.Glide) {
 			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit climbableObjectHit, ledgeClimbDistance, climbLayer)) {
 				if (climbableObjectHit.transform.tag == "Climbable-Object" && z > 0) {
 					movementSpeed = climbSpeed;
@@ -334,7 +335,7 @@ public class PlayerMovement : MonoBehaviour
 		move.Normalize();
 		controller.Move(move * movementSpeed * Time.deltaTime);
 
-		if (Input.GetButtonDown("Jump")) {
+		if (Input.GetKeyDown(KeyBindings.instance.jump)) {
 			velocity.y = -2f;
 			movementSpeed = walkSpeed;
 			state = State.Normal;
@@ -384,7 +385,7 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void HandleGlideStart() {
-		if (Input.GetButtonDown("Glide")) {
+		if (Input.GetKeyDown(KeyBindings.instance.glider) && !Physics.Raycast(transform.position, -Vector3.up, out RaycastHit hit, 5f, groundMask)) {
 			movementSpeed = glideHorizontalSpeed;
 			velocity.y = glideVerticalSpeed;
 			state = State.Glide;
@@ -399,13 +400,13 @@ public class PlayerMovement : MonoBehaviour
 		controller.Move(velocity * Time.deltaTime);
 
 		//Stop glide if canceled with button press or by landing
-		if (Input.GetButtonDown("Glide") || Physics.CheckSphere(groundCheck.position, groundDistance, groundMask)) {
+		if (Input.GetKeyDown(KeyBindings.instance.glider) || Physics.CheckSphere(groundCheck.position, groundDistance, groundMask)) {
 			state = State.Normal;
 		}
 	}
 
 	private void HandleGrapplingHookShot() {
-		if (Input.GetButtonDown("Throw Hook")) {
+		if (Input.GetKeyDown(KeyBindings.instance.throwHook)) {
 			if (Physics.Raycast(camera.transform.position, camera.transform.forward, out RaycastHit raycastHit, maxGrappleDistance, gliderLayerMask | climbLayer))
 			{
 				//animator.SetBool("throwHook", true);

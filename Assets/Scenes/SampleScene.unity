@@ -2673,6 +2673,7 @@ GameObject:
   m_Component:
   - component: {fileID: 389995542}
   - component: {fileID: 389995541}
+  - component: {fileID: 389995544}
   - component: {fileID: 389995543}
   m_Layer: 0
   m_Name: GlobalGameManager
@@ -2723,6 +2724,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   items: []
   amounts: 
+--- !u!114 &389995544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 389995540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a645996293dd74a88acdea032ea2b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  openStorage: 101
+  interactWithInventory: 0
+  inventorySpecialAction: 0
+  splitStackHalf: 0
+  switchCameras: 0
+  sprint: 0
+  crouch: 0
+  jump: 0
+  glider: 0
+  throwHook: 0
 --- !u!1 &390019288
 GameObject:
   m_ObjectHideFlags: 0
@@ -8418,7 +8441,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1298694560}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4, y: 12.7, z: 80}
+  m_LocalPosition: {x: -4, y: 20.62, z: 80}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 356087656}
@@ -8438,13 +8461,19 @@ TextMesh:
 
     Lshift - Sprint
 
+    Lctrl - crouch
+
     Q - Glider
 
-    Lmouse - Grappling Hook
+    F - Grappling Hook
 
-    E - Pick Up
+    E - Pick Up | Open/Close Storage
 
-    Tab - Inventory'
+    Tab - Open/Close Inventory
+
+    V - Switch cameras
+
+    Lctrl + RM (on item stack) - split half'
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1
@@ -8457,7 +8486,7 @@ TextMesh:
   m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
   m_Color:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4278190183
 --- !u!23 &1298694563
 MeshRenderer:
   m_ObjectHideFlags: 0

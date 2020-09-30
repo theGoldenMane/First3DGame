@@ -14,7 +14,7 @@ public class PlayerActions : MonoBehaviour
 
 	void Update()
 	{
-		if (Input.GetKeyDown(KeyCode.E)) {
+		if (Input.GetKeyDown(KeyBindings.instance.openStorage)) {
 			Ray ray = GlobalGameManager.instance.currentCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 			bool raycastHits = Physics.Raycast(ray, out RaycastHit hit, pickUpDistance);
 			if (raycastHits) {
@@ -31,7 +31,7 @@ public class PlayerActions : MonoBehaviour
 					storageOpen = false;
 				}
 			}
-		} else if (Input.GetKeyDown(KeyCode.Tab)) {
+		} else if (Input.GetKeyDown(KeyBindings.instance.interactWithInventory)) {
 			if (!inventoryOpen) {
 				OpenInventory();
 				inventoryOpen = true;

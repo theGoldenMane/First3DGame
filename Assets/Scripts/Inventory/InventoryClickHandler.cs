@@ -12,7 +12,7 @@ public class InventoryClickHandler : MonoBehaviour
 	}
 
 	public void Update() {
-		if (Input.GetKey(KeyCode.LeftControl) && Input.GetMouseButtonDown(0) && EventSystem.current.currentSelectedGameObject != null) {
+		if (Input.GetKey(KeyBindings.instance.inventorySpecialAction) && Input.GetKeyDown(KeyBindings.instance.splitStackHalf) && EventSystem.current.currentSelectedGameObject != null) {
 			inventory.SplitStack(EventSystem.current.currentSelectedGameObject.transform.parent.GetSiblingIndex());
 		}
 	}
