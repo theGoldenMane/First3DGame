@@ -199,16 +199,17 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void HandleCamera() {
-		float mouseX = Input.GetAxis("Mouse X") * mouseSensivity * Time.deltaTime;
-		float mouseY = Input.GetAxis("Mouse Y") * mouseSensivity * Time.deltaTime;
-
-		xRotation -= mouseY;
-		xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
 		if (firstPersonCameraActive) {
+			float mouseX = Input.GetAxis("Mouse X") * mouseSensivity * Time.deltaTime;
+			float mouseY = Input.GetAxis("Mouse Y") * mouseSensivity * Time.deltaTime;
+
+			xRotation -= mouseY;
+			xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
 			camera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+			transform.Rotate(Vector3.up * mouseX);
 		}
-		transform.Rotate(Vector3.up * mouseX);
 	}
 
 	private void HandleClimbCamera() {

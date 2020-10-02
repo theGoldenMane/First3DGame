@@ -65,6 +65,7 @@
      <Compile Include="Assets\Scripts\KeyBindings.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerActions.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
+     <Compile Include="Assets\Scripts\Player\ThirdPersonCameraController.cs" />
      <Compile Include="Assets\Scripts\Storage\StorageController.cs" />
      <None Include="Assets\SkySerie Freebie\Hdri setup.txt" />
  <Reference Include="Unity.ProBuilder">
