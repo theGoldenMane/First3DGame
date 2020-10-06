@@ -66,7 +66,10 @@
      <Compile Include="Assets\Scripts\Player\PlayerActions.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
      <Compile Include="Assets\Scripts\Player\ThirdPersonCameraController.cs" />
+     <Compile Include="Assets\Scripts\Storage\Storage.cs" />
      <Compile Include="Assets\Scripts\Storage\StorageController.cs" />
+     <Compile Include="Assets\Scripts\Storage\StorageSlot.cs" />
+     <Compile Include="Assets\Scripts\Storage\StorageUI.cs" />
      <None Include="Assets\SkySerie Freebie\Hdri setup.txt" />
  <Reference Include="Unity.ProBuilder">
  <HintPath>D:/Git Repos/First3DGame/Library/ScriptAssemblies/Unity.ProBuilder.dll</HintPath>

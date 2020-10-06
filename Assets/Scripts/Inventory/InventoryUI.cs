@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class InventoryUI : MonoBehaviour
 {
-
 	Inventory inventory;
 	InventorySlot[] slots;
 	public Transform slotHolder;

@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 public class Inventory : MonoBehaviour
 {
 	public static Inventory instance;
+	public int inventorySize;
 
 	public delegate void OnItemChange();
 	public OnItemChange onItemChangedCallback;
@@ -27,8 +28,8 @@ public class Inventory : MonoBehaviour
 	}
 
 	void Start() {
-		items = new Item[25];
-		amounts = new int[25];
+		items = new Item[inventorySize];
+		amounts = new int[inventorySize];
 	}
 
 	public int Add (Item item, int amount) {
@@ -77,6 +78,40 @@ public class Inventory : MonoBehaviour
 		}
 
 		return returnValue;
+	}
+
+	public void AddToIndex(Item item, int amount, int itemIndex) {
+		if (items[itemIndex] == null) {
+			items[itemIndex] = item;
+			amounts[itemIndex] = amount;
+
+		} else {
+			int itemExistsIndex = ItemAlreadyInInventory(item);
+
+			int newAmount = amount + amounts[itemExistsIndex];
+			if (newAmount > item.maxStackSize) {
+				// Check if inventoy has empty slots
+				int indexOfEmpty = GetFirstEmptySlot();
+				if (indexOfEmpty > -1) {
+					// Max stack size exceeded & space in inventory -> new additional stack
+					amounts[itemExistsIndex] = item.maxStackSize;
+					items[indexOfEmpty] = item;
+					amounts[indexOfEmpty] = newAmount - item.maxStackSize;
+				} else {
+					// Max stack size exceeded & inventory full -> fill stack unil max amount and leave rest in Inventory
+					amounts[itemExistsIndex] = item.maxStackSize;
+					//returnValue = newAmount - item.maxStackSize;
+					Debug.LogWarning("Can't pick up all, not enough space in Inventory");
+				}
+			} else {
+				// Combine stacks
+				amounts[itemExistsIndex] = newAmount;
+			}
+		}
+
+		if (onItemChangedCallback != null) {
+			onItemChangedCallback.Invoke();
+		}
 	}
 
 	public void Drop (int itemIndex) {
@@ -170,6 +205,11 @@ public class Inventory : MonoBehaviour
 		if (inventoryChanged && onItemChangedCallback != null) {
 			onItemChangedCallback.Invoke();
 		}
+	}
+
+	public void AddToStorage(GameObject storage, Item item, int amount, int itemIndex, int deleteIndex) {
+		storage.GetComponent<Storage>().AddToIndex(item, amount, itemIndex);
+		Destroy(deleteIndex);
 	}
 
 	private int GetFirstEmptySlot() {

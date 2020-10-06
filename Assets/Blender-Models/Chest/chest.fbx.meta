@@ -17,14 +17,19 @@ ModelImporter:
     400008: chest
     400010: Pivot
     400012: Pivot_end
-    2100000: No Name
+    2100000: Wood_Light
     4300000: chest
     7400000: Armature|ChestCloseAnimation
     7400002: Armature|ChestIdleAnimation
     7400004: Armature|ChestOpenAnimation
     9500000: //RootNode
     13700000: chest
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Wood_Light
+    second: {fileID: 2100000, guid: 4f52876c1668ed64dad291f6fcff8833, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

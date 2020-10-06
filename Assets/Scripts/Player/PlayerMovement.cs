@@ -229,9 +229,19 @@ public class PlayerMovement : MonoBehaviour
 	private void HandleMovement() {
 		x = Input.GetAxisRaw("Horizontal");
 		z = Input.GetAxisRaw("Vertical");
+
+		if (currentCamera == thirdPersonCamera) {
+			if (x == 0 && z == 0) {
+				currentCamera.GetComponent<ThirdPersonCameraController>().playerIsMoving = false;
+			} else if (x != 0 || z != 0) {
+				currentCamera.GetComponent<ThirdPersonCameraController>().playerIsMoving = true;
+			}
+		}
+
 		if (state == State.Jump) {
 			z = jumpVerticalDirection;
 		}
+
 		move = transform.right * x + transform.forward * z;
 		move.Normalize();
 		controller.Move(move * movementSpeed * Time.deltaTime);
