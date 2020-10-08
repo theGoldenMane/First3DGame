@@ -22,10 +22,12 @@ public class PlayerActions : MonoBehaviour
 					hit.transform.gameObject.GetComponent<ItemPickup>().PickUp();
 				} else if (hit.transform.tag == "Storage" && !storageOpen) {
 					currentOpenStorage = hit.transform.gameObject.GetComponent<StorageController>();
+					Inventory.instance.currentOpenStorage = currentOpenStorage.storageInventory.transform.GetChild(0).GetChild(0).GetComponent<Storage>();
 					currentOpenStorage.OpenStorage();
 					OpenInventory();
 					storageOpen = true;
 				} else if (storageOpen) {
+					Inventory.instance.currentOpenStorage = null;
 					currentOpenStorage.CloseStorage();
 					CloseInventory();
 					storageOpen = false;

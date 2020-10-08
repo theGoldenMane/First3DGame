@@ -8,6 +8,8 @@ public class Inventory : MonoBehaviour
 	public static Inventory instance;
 	public int inventorySize;
 
+	public Storage currentOpenStorage;
+
 	public delegate void OnItemChange();
 	public OnItemChange onItemChangedCallback;
 
@@ -80,38 +82,63 @@ public class Inventory : MonoBehaviour
 		return returnValue;
 	}
 
-	public void AddToIndex(Item item, int amount, int itemIndex) {
+	public int AddToIndex(Item item, int amount, int itemIndex) {
+		bool inventoryChanged = true;
+
 		if (items[itemIndex] == null) {
+			// Add item to empty storage slot
 			items[itemIndex] = item;
 			amounts[itemIndex] = amount;
-
 		} else {
-			int itemExistsIndex = ItemAlreadyInInventory(item);
-
-			int newAmount = amount + amounts[itemExistsIndex];
+			int newAmount = amount + amounts[itemIndex];
 			if (newAmount > item.maxStackSize) {
-				// Check if inventoy has empty slots
-				int indexOfEmpty = GetFirstEmptySlot();
-				if (indexOfEmpty > -1) {
-					// Max stack size exceeded & space in inventory -> new additional stack
-					amounts[itemExistsIndex] = item.maxStackSize;
-					items[indexOfEmpty] = item;
-					amounts[indexOfEmpty] = newAmount - item.maxStackSize;
-				} else {
-					// Max stack size exceeded & inventory full -> fill stack unil max amount and leave rest in Inventory
-					amounts[itemExistsIndex] = item.maxStackSize;
-					//returnValue = newAmount - item.maxStackSize;
-					Debug.LogWarning("Can't pick up all, not enough space in Inventory");
+				// Max stack size exceeded -> Fill all already existing stacks that are not exceeded
+				List<int> stackableSlots = GetAllNotExceededSlotsWithSameItem(item);
+				if (stackableSlots.Count > 0) {
+					newAmount = amount;
+					for (int i = 0; i < stackableSlots.Count; i++) {
+						int slotNr = stackableSlots[i];
+						if (newAmount == 0) {
+							break;
+						}
+
+						if (newAmount + amounts[slotNr] > item.maxStackSize) {
+							int diff = item.maxStackSize - amounts[slotNr];
+							amounts[slotNr] = item.maxStackSize;
+							newAmount -= diff;
+						} else {
+							amounts[slotNr] += newAmount;
+							newAmount = 0;
+						}
+					}
+				}
+
+				// If there are no stacks with same item or if amount could not be distributed completly to other slots-> Check if empty slot is available
+				if (stackableSlots.Count < 0 || newAmount > 0) {
+					// Check if inventoy has empty slots
+					int indexOfEmpty = GetFirstEmptySlot();
+					if (indexOfEmpty > -1) {
+						// Max stack size exceeded & space in inventory -> new additional stack
+						items[indexOfEmpty] = item;
+						amounts[indexOfEmpty] = newAmount;
+					} else {
+						// Max stack size exceeded & inventory full -> fill stack unil max amount and leave rest in Inventory
+						return newAmount - item.maxStackSize;
+						inventoryChanged = false;
+						Debug.LogWarning("Can't pick up all, not enough space in Storage");
+					}
 				}
 			} else {
 				// Combine stacks
-				amounts[itemExistsIndex] = newAmount;
+				amounts[itemIndex] = newAmount;
 			}
 		}
 
-		if (onItemChangedCallback != null) {
+		if (inventoryChanged && onItemChangedCallback != null) {
 			onItemChangedCallback.Invoke();
 		}
+
+		return 0;
 	}
 
 	public void Drop (int itemIndex) {
@@ -185,7 +212,7 @@ public class Inventory : MonoBehaviour
 				// Check if stack has even amount
 				if (amount % 2 != 0) {
 					// Odd
-					firstStack = amount / 2 +1 ;
+					firstStack = amount / 2 + 1 ;
 					secondStack = amount / 2;
 				} else {
 					// Even
@@ -207,9 +234,62 @@ public class Inventory : MonoBehaviour
 		}
 	}
 
+	public void SplitOneFromStack(int itemIndex) {
+		bool inventoryChanged = false;
+		// Split stack if item exists in this slot and stack is greater 1
+		int amount = amounts[itemIndex];
+		if (items[itemIndex] != null && amounts[itemIndex] > 1) {
+			// Check if there would be space for second stack
+			int indexOfEmpty = GetFirstEmptySlot();
+			if (indexOfEmpty > -1) {
+				amounts[itemIndex] -= 1;
+				items[indexOfEmpty] = items[itemIndex];
+				amounts[indexOfEmpty] = 1;
+
+				inventoryChanged = true;
+			}
+		}
+
+		// Fire GUI update event if inventory items/amount changed
+		if (inventoryChanged && onItemChangedCallback != null) {
+			onItemChangedCallback.Invoke();
+		}
+	}
+
+	public void DeleteOneItemFromStack(int itemIndex) {
+		amounts[itemIndex] -= 1;
+		if (onItemChangedCallback != null) {
+			onItemChangedCallback.Invoke();
+		}
+	}
+
 	public void AddToStorage(GameObject storage, Item item, int amount, int itemIndex, int deleteIndex) {
-		storage.GetComponent<Storage>().AddToIndex(item, amount, itemIndex);
-		Destroy(deleteIndex);
+		int excessAmount = storage.GetComponent<Storage>().AddToIndex(item, amount, itemIndex);
+		if (excessAmount == 0) {
+			Destroy(deleteIndex);
+		} else {
+			amounts[deleteIndex] = excessAmount;
+		}
+	}
+
+	public void MoveStackToStorage(GameObject storage, Item item, int amount, int deleteIndex) {
+		int excessAmount = storage.GetComponent<Storage>().Add(item, amount);
+		if (excessAmount == 0) {
+			Destroy(deleteIndex);
+		} else {
+			amounts[deleteIndex] = excessAmount;
+		}
+	}
+
+	public void MoveOneFromStackToStorage(GameObject storage, Item item, int itemIndex) {
+		if (amounts[itemIndex] > 1) {
+			int excessAmount = storage.GetComponent<Storage>().Add(item, 1);
+			if (excessAmount == 0) {
+				DeleteOneItemFromStack(itemIndex);
+			} else {
+				amounts[itemIndex] = excessAmount;
+			}
+		}
 	}
 
 	private int GetFirstEmptySlot() {
@@ -223,10 +303,24 @@ public class Inventory : MonoBehaviour
 		return indexOfEmpty;
 	}
 
+	private List<int> GetAllNotExceededSlotsWithSameItem(Item item) {
+		List<int> indexOfSame = new List<int>();
+		if (items.Length > 0) {
+			for (int i = 0; i < items.Length; i++) {
+				if (items[i] == item && amounts[i] < item.maxStackSize) {
+					indexOfSame.Add(i);
+				}
+			}
+		}
+		return indexOfSame;
+	}
+
 	private int ItemAlreadyInInventory(Item item) {
-		for (int i = 0; i < items.Length; i++) {
-			if (items[i] == item && amounts[i] < item.maxStackSize) {
-				return i;
+		if (items.Length > 0) {
+			for (int i = 0; i < items.Length; i++) {
+				if (items[i] == item && amounts[i] < item.maxStackSize) {
+					return i;
+				}
 			}
 		}
 		return -1;

@@ -57,11 +57,11 @@
      <Compile Include="Assets\Scripts\GlobalGameManager.cs" />
      <Compile Include="Assets\Scripts\Hotbar\HotbarUI.cs" />
      <Compile Include="Assets\Scripts\Inventory\Inventory.cs" />
-     <Compile Include="Assets\Scripts\Inventory\InventoryClickHandler.cs" />
      <Compile Include="Assets\Scripts\Inventory\InventorySlot.cs" />
      <Compile Include="Assets\Scripts\Inventory\InventoryUI.cs" />
      <Compile Include="Assets\Scripts\Inventory\Item.cs" />
      <Compile Include="Assets\Scripts\Inventory\ItemPickup.cs" />
+     <Compile Include="Assets\Scripts\InventoryStorageClickHandler.cs" />
      <Compile Include="Assets\Scripts\KeyBindings.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerActions.cs" />
      <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />

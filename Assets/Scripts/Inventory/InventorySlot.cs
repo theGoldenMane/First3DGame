@@ -78,7 +78,12 @@ public class InventorySlot : MonoBehaviour,
    {
       if (dragging) {
          GameObject hoveredItem = eventData.pointerCurrentRaycast.gameObject;
-         Transform slotHolder = hoveredItem.transform.parent.transform.parent;
+         Transform slotHolder;
+         if (hoveredItem.name == "Button") {
+            slotHolder = hoveredItem.transform.parent.transform.parent;
+         } else {
+            slotHolder = hoveredItem.transform.parent.transform.parent.transform.parent;
+         }
 
          if (hoveredItem == null) {
             Inventory.instance.Drop(originalIndex);
@@ -87,7 +92,7 @@ public class InventorySlot : MonoBehaviour,
             if (hoveredItem.transform.parent.transform.parent.name != "DragParent" || hoveredItem.name == "Background") {
                if (slotHolder.tag == "Storage") {
                   // Move item from inventory to storage
-                  Inventory.instance.AddToStorage(hoveredItem.transform.parent.transform.parent.gameObject, item, int.Parse(amount.text), slotNr, originalIndex);
+                  Inventory.instance.AddToStorage(slotHolder.gameObject, item, int.Parse(amount.text), slotNr, originalIndex);
                } else if (Inventory.instance.items[slotNr] == null) {
                   // Move item to empty field
                   Inventory.instance.Move(originalIndex, slotNr);
@@ -97,7 +102,7 @@ public class InventorySlot : MonoBehaviour,
                } else {
                   // Swap items
                   Inventory.instance.Swap(originalIndex, hoveredItem.transform.parent.transform.parent.transform.GetSiblingIndex());
-               } 
+               }
             }
          }
 
