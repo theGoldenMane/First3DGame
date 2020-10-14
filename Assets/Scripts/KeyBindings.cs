@@ -45,19 +45,19 @@ public class KeyBindings : MonoBehaviour
 
 		// Split item stack in half
 		inventorySplitAction = KeyCode.LeftControl;
-		splitStackHalf = "Fire1";
+		splitStackHalf = "LMouse";
 
 		// Split one item from stack
 		inventorySplitAction = KeyCode.LeftControl;
-		splitOneItemFromStack = "Fire2";
+		splitOneItemFromStack = "RMouse";
 
 		// Move stack (Inventory/Storage)
 		inventoryMoveAction = KeyCode.LeftShift;
-		moveStack = "Fire1";
+		moveStack = "LMouse";
 
 		// Move one item from stack (Inventory/Storage)
 		inventoryMoveAction = KeyCode.LeftShift;
-		moveOneItemFromStack = "Fire2";
+		moveOneItemFromStack = "RMouse";
 
 		// Switch between first and third person camera
 		switchCameras = KeyCode.V;
