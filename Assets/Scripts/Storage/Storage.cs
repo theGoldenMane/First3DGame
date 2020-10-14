@@ -27,18 +27,40 @@ public class Storage : MonoBehaviour
 		if (itemExistsIndex > -1) {
 			int newAmount = amount + amounts[itemExistsIndex];
 			if (newAmount > item.maxStackSize) {
-				// Check if inventoy has empty slots
-				int indexOfEmpty = GetFirstEmptySlot();
-				if (indexOfEmpty > -1) {
-					// Max stack size exceeded & space in inventory -> new additional stack
-					amounts[itemExistsIndex] = item.maxStackSize;
-					items[indexOfEmpty] = item;
-					amounts[indexOfEmpty] = newAmount - item.maxStackSize;
-				} else {
-					// Max stack size exceeded & inventory full -> fill stack unil max amount and leave rest
-					amounts[itemExistsIndex] = item.maxStackSize;
-					returnValue = newAmount - item.maxStackSize;
-					Debug.LogWarning("Can't pick up all, not enough space in Inventory");
+				// Max stack size exceeded -> Fill all already existing stacks that are not exceeded
+				List<int> stackableSlots = GetAllNotExceededSlotsWithSameItem(item);
+				if (stackableSlots.Count > 0) {
+					newAmount = amount;
+					for (int i = 0; i < stackableSlots.Count; i++) {
+						int slotNr = stackableSlots[i];
+						if (newAmount == 0) {
+							break;
+						}
+
+						if (newAmount + amounts[slotNr] > item.maxStackSize) {
+							int diff = item.maxStackSize - amounts[slotNr];
+							amounts[slotNr] = item.maxStackSize;
+							newAmount -= diff;
+						} else {
+							amounts[slotNr] += newAmount;
+							newAmount = 0;
+						}
+					}
+				}
+				// If there are no stacks with same item or if amount could not be distributed completly to other slots-> Check if empty slot is available
+				if (stackableSlots.Count < 0 || newAmount > 0) {
+					// Check if inventoy has empty slots
+					int indexOfEmpty = GetFirstEmptySlot();
+					if (indexOfEmpty > -1) {
+						// Max stack size exceeded & space in inventory -> new additional stack
+						items[indexOfEmpty] = item;
+						amounts[indexOfEmpty] = newAmount;
+					} else {
+						// Max stack size exceeded & inventory full -> fill stack unil max amount and leave rest in Inventory
+						return newAmount - item.maxStackSize;
+						inventoryChanged = false;
+						Debug.LogWarning("Can't pick up all, not enough space in Storage");
+					}
 				}
 			} else {
 				// Combine stacks

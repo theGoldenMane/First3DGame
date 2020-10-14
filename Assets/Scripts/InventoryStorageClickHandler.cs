@@ -71,7 +71,7 @@ public class InventoryStorageClickHandler : MonoBehaviour
 	// Check if source of action is inventory or storage
 	private bool ActionFromStorage(GameObject clickedItem) {
 		if (clickedItem.transform.parent.gameObject.tag == "Storage") {
-			storage = clickedItem.GetComponent<Storage>();
+			storage = clickedItem.transform.parent.gameObject.GetComponent<Storage>();
 			return true;
 		}
 
