@@ -29,12 +29,12 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Wood_Light
-    second: {fileID: 2100000, guid: 4f52876c1668ed64dad291f6fcff8833, type: 2}
+    second: {fileID: 2100000, guid: 72d992ef0312b0b4a875f6e3d05be412, type: 2}
   materials:
     importMaterials: 1
     materialName: 0
     materialSearch: 1
-    materialLocation: 1
+    materialLocation: 0
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
