@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89256c727e918c049802fa39e00a11a7, type: 3}
+  m_Name: Cube
+  m_EditorClassIdentifier: 
+  id: 0
+  name: Cube
+  icon: {fileID: 21300000, guid: caa6f9ac69274204c852345e680f5a7e, type: 3}
+  prefab: {fileID: 3469837755530989781, guid: 8768d7e617d39714993f52d8e63b0b74, type: 3}
+  maxStackSize: 10
