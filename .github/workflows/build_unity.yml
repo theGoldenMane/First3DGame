@@ -1,7 +1,7 @@
 name: Unity Build
 
-on: push
-
+on:
+  workflow_dispatch: {}
 jobs:
   buildForWeb:
     name: Build for ${{ matrix.targetPlatform }}
