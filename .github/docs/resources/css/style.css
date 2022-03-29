@@ -1,0 +1,30 @@
+body {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 300 !important;
+  color: #FFFFFF;
+  background-color: #0c0c0c;
+  overflow: hidden;
+}
+
+h1 {
+  text-align: center;
+  margin-top: 60px;
+  margin-bottom: 80px;
+  color: #FFF;
+}
+
+#gameContainer {
+  background-color: transparent !important;
+  width: 960px;
+  height: 540px;
+}
+
+.webgl-content {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+/*# sourceMappingURL=style.css.map */
